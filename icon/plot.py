@@ -234,6 +234,6 @@ if __name__ == "__main__":
   quest_qoi_v = np.arange(7)[:,None] * 30
   quest_mask = np.ones((7,))
   quest_qoi_v_true = np.arange(7)[:,None] * 30.1
-  fig = plot_all_in_one("test", prompt, mask, quest_qoi_k, quest_mask, quest_qoi_v_true, quest_qoi_v, demo_num = demo_num, k_dim = 3, v_dim = 4, to_tfboard = False)
+  fig = plot_all_in_one("test", prompt, mask, quest_qoi_k, quest_mask, quest_qoi_v_true, quest_qoi_v, demo_num = demo_num, k_dim = 3, v_dim = 4, k_mode = "naive", to_tfboard = False)
   filename = "./allfigs_{}.png".format("test")
   fig.savefig(filename)

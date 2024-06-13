@@ -1,4 +1,5 @@
 import jax
+config = jax.config
 import jax.numpy as jnp
 from collections import namedtuple
 from functools import partial
@@ -101,7 +102,6 @@ def generate_one_dyn(key, ode_batch_fn, dt, length, num, k_sigma, k_l, init_rang
 
 
 if __name__ == "__main__":
-  from jax.config import config
   config.update('jax_enable_x64', True)
 
   # test du/dt = u, with ground truth u = exp(t)

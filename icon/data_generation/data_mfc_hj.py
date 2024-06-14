@@ -1,10 +1,11 @@
-from jax.config import config
+# from jax.config import config
 import os
-config.update('jax_enable_x64', True)
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
 import sys
 sys.path.append('../')
 import jax
+config = jax.config
+config.update('jax_enable_x64', True)
 import jax.numpy as jnp
 import numpy as np
 from functools import partial
@@ -16,7 +17,7 @@ import matplotlib.pyplot as plt
 from datagen import generate_gaussian_process, rbf_circle_kernel_jax
 import haiku as hk
 import gc
-from utils import timer
+# from utils import timer
 
 
 # phi(x,t) = -eps log \int exp(-1/eps(g(u) + (x-u)^2/2/t)) / sqrt(2pi* t* eps)du

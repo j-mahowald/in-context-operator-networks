@@ -1,4 +1,4 @@
-from jax.config import config
+# from jax.config import config
 import tensorflow as tf
 import os
 from utils import load_json
@@ -7,6 +7,9 @@ tf.config.set_visible_devices([], device_type='GPU')
 from pprint import pprint
 
 import jax
+config = jax.config
+# jax.config module has been deprecated in v0.4.29. 
+# Please use jax.config instead.
 import jax.numpy as jnp
 import jax.tree_util as tree
 import numpy as np
@@ -350,10 +353,10 @@ if __name__ == '__main__':
   flags.DEFINE_integer('list_size', 0, 'size of list used to increase batch size, 0 means no')
   flags.DEFINE_integer('plot_num', None, 'number of plot cases to tfboard')
 
-  flags.DEFINE_list('train_data_dirs', [], 'directories of training data')
+  flags.DEFINE_list('train_data_dirs', ["data_generation/train_data"], 'directories of training data')
   flags.DEFINE_list('train_data_globs', ['train*'], 'filename glob patterns of training data')
   flags.DEFINE_string('train_config_filename', 'train_config.json', 'config file for training')
-  flags.DEFINE_list('test_data_dirs', None, 'directories of testing data')
+  flags.DEFINE_list('test_data_dirs', ["data_generation/train_data"], 'directories of testing data')
   flags.DEFINE_list('test_data_globs', ['test*'], 'filename glob patterns of testing data')
   flags.DEFINE_string('test_config_filename', None, 'config file for testing')
 

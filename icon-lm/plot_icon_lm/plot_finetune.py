@@ -7,7 +7,9 @@ from absl import app, flags, logging
 import sys
 sys.path.append('../')
 
-from jax.config import config
+# from jax.config import config
+import jax
+config = jax.config
 import tensorflow as tf
 import os
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'

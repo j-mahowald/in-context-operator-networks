@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import jax
 import jax.numpy as jnp
-from jax.config import config
+# from jax.config import config
+config = jax.config
 import tensorflow as tf
 import os
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'

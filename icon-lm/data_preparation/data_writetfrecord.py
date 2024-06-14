@@ -23,7 +23,7 @@ def serialize_element(equation, caption, cond_k, cond_v, qoi_k, qoi_v, count):
     write_list = FLAGS.write
     _print = count < 5
 
-    utils.print_dot(count, freq = 100, marker = "+")
+    # utils.print_dot(count, freq = 100, marker = "+")
     cond_k = cond_k.astype(np.float32)
     cond_v = cond_v.astype(np.float32)
     qoi_k = qoi_k.astype(np.float32)

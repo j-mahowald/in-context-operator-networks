@@ -18,6 +18,9 @@ import data_mfc_hj as mfc_hj
 import data_writetfrecord as datawrite
 import data_utils
 
+def print_dot(i):
+  if i % 100 == 0:
+    print(".", end = "", flush = True)
 
 def generate_ode_auto_const(seed, eqns, quests, length, dt, num, caption_mode, name):
   '''du/dt = a * c + b'''
@@ -36,7 +39,7 @@ def generate_ode_auto_const(seed, eqns, quests, length, dt, num, caption_mode, n
       all_us.append(traj)
       all_params.append("{:.8f}_{:.8f}".format(coeff_a, coeff_b))
       all_eqn_captions.append(None)
-    utils.print_dot(i)
+    print_dot(i)
   for ptype in ['forward', 'inverse']:
     datawrite.write_ode_tfrecord(name = name, eqn_type = "ode_auto_const", 
                       all_params = all_params, all_eqn_captions = all_eqn_captions,
@@ -62,7 +65,7 @@ def generate_ode_auto_linear1(seed, eqns, quests, length, dt, num, caption_mode,
       all_us.append(traj)
       all_params.append("{:.8f}_{:.8f}".format(coeff_a, coeff_b))
       all_eqn_captions.append(None)
-    utils.print_dot(i)
+    print_dot(i)
   for ptype in ['forward', 'inverse']:
     datawrite.write_ode_tfrecord(name = name, eqn_type = "ode_auto_linear1", 
                         all_params = all_params, all_eqn_captions = all_eqn_captions,
@@ -87,7 +90,7 @@ def generate_ode_auto_linear2(seed, eqns, quests, length, dt, num, caption_mode,
       all_us.append(traj)
       all_params.append("{:.8f}_{:.8f}_{:.8f}".format(coeff_a1, coeff_a2, coeff_a3))
       all_eqn_captions.append(None)
-    utils.print_dot(i)
+    print_dot(i)
   for ptype in ['forward', 'inverse']:
     datawrite.write_ode_tfrecord(name = name, eqn_type = "ode_auto_linear2", 
                         all_params = all_params, all_eqn_captions = all_eqn_captions,
@@ -119,7 +122,7 @@ def generate_damped_oscillator(seed, eqns, quests, length, dt, num, caption_mode
       all_us_second.append(us_second)
       all_params.append("{:.8f}".format(decay))
       all_eqn_captions.append(None)
-    utils.print_dot(i)
+    print_dot(i)
   for ptype in ['forward', 'inverse']:
     datawrite.write_series_tfrecord(name = name, eqn_type = "series_damped_oscillator", 
                       all_params = all_params, all_eqn_captions = all_eqn_captions, 
@@ -152,7 +155,7 @@ def generate_pde_poisson(seed, eqns, quests, length, dx, num, caption_mode, name
       all_us.append(einshape("ij->ijk", us, k = 1)) # (num, N+1, 1)
       all_params.append("{:.8f}_{:.8f}".format(coeff_ul, coeff_ur))
       all_eqn_captions.append(None)
-    utils.print_dot(i)
+    print_dot(i)
   for ptype in ['forward', 'inverse']:
     datawrite.write_pde_tfrecord(name = name, eqn_type = "pde_poisson_spatial", 
                       all_params = all_params, all_eqn_captions = all_eqn_captions,
@@ -192,7 +195,7 @@ def generate_pde_porous(seed, eqns, quests, length, dx, num, caption_mode, name)
       all_us.append(einshape("ij->ijk", us, k = 1)) # (num, N+1, 1)
       all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}".format(coeff_ul, coeff_ur, coeff_c, coeff_a))
       all_eqn_captions.append(None)
-    utils.print_dot(i)
+    print_dot(i)
   for ptype in ['forward', 'inverse']:
     datawrite.write_pde_tfrecord(name = name, eqn_type = "pde_porous_spatial", 
                       all_params = all_params, all_eqn_captions = all_eqn_captions,
@@ -230,7 +233,7 @@ def generate_pde_cubic(seed, eqns, quests, length, dx, num, caption_mode, name):
       all_us.append(einshape("ij->ijk", us, k = 1)) # (num, N+1, 1)
       all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}".format(coeff_ul, coeff_ur, coeff_a, coeff_k))
       all_eqn_captions.append(None)
-    utils.print_dot(i)
+    print_dot(i)
   for ptype in ["forward","inverse"]:
     datawrite.write_pde_tfrecord(name = name, eqn_type = "pde_cubic_spatial",
                       all_params = all_params, all_eqn_captions = all_eqn_captions,
@@ -281,7 +284,7 @@ def generate_mfc_gparam_hj(seed, eqns, quests, length, dx, dt, nu_nx_ratio, num,
       all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}"
                     .format(g[0], g[nu//10], g[2*nu//10], g[3*nu//10], g[4*nu//10], g[5*nu//10], g[6*nu//10], g[7*nu//10], g[8*nu//10], g[9*nu//10]))
       all_eqn_captions.append(None)
-    utils.print_dot(i)
+    print_dot(i)
   for ptype in ["forward11", "forward12", "forward22"]:
     datawrite.write_mfc_gparam_hj_tfrecord(name = name, eqn_type = "mfc_gparam_hj",
                                             all_params = all_params, all_eqn_captions = all_eqn_captions,
@@ -334,7 +337,7 @@ def generate_mfc_rhoparam_hj(seed, eqns, quests, length, dx, dt, nu_nx_ratio, nu
       all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}"
                     .format(init_rho[0], init_rho[nu//10], init_rho[2*nu//10], init_rho[3*nu//10], init_rho[4*nu//10], init_rho[5*nu//10], init_rho[6*nu//10], init_rho[7*nu//10], init_rho[8*nu//10], init_rho[9*nu//10]))
       all_eqn_captions.append(None)
-    utils.print_dot(i)
+    print_dot(i)
   for ptype in ["forward11", "forward12"]:
     datawrite.write_mfc_rhoparam_hj_tfrecord(name = name, eqn_type = "mfc_rhoparam_hj", 
                                               all_params = all_params, all_eqn_captions = all_eqn_captions,

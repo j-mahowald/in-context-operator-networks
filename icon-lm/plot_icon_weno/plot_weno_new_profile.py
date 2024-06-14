@@ -41,7 +41,7 @@ def main(argv):
   model_config = utils.load_json("../config_model/model_lm_config.json")
   model_config['caption_len'] = 0
 
-  restore_dir = '/home/shared/icon/save/user/ckpts/icon_weno/{}'.format(FLAGS.ckpt)
+  restore_dir = '/workspace/Jamie/in-context-operator-networks/icon-lm/save/user/ckpts/icon_weno/{}'.format(FLAGS.ckpt)
   restore_step = 1000000
   real_name = 'sin_1.0_-1.0_1.0_1.0'
   name = real_name

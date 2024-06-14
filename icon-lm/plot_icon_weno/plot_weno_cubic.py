@@ -289,7 +289,7 @@ if __name__ == "__main__":
   demo_num_list = [1,2,3,4,5]
   caption_id = -1
 
-  folder = "/home/shared/icon/analysis/icon_weno_20231213-111526"
+  folder = "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_weno_20231213-111526"
   a_range = np.linspace(-1, 1, 11)
   b_range = np.linspace(-1, 1, 11)
   c_range = np.linspace(-1, 1, 11)

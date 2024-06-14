@@ -125,7 +125,9 @@ def build_network_fn(data, key, config):
 
 
 if __name__ == "__main__":
-  from jax.config import config
+  # from jax.config import config
+  import jax
+  config = jax.config
   config.update('jax_enable_x64', True)
   from dataloader import DataProvider, print_eqn_caption
   from pprint import pprint

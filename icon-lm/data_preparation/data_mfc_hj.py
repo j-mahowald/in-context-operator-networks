@@ -16,7 +16,8 @@ from collections import namedtuple
 import matplotlib.pyplot as plt
 import haiku as hk
 import gc
-from utils import timer
+# from utils import utils.timer
+import utils
 import data_utils
 
 
@@ -552,7 +553,7 @@ def test_bdd_randg_randrho0(nx, nt, nu_nx_ratio, if_plot = True):
     du = (u_right - u_left) / nu
     dx = (x_right - x_left) / nx
     print(f'dx = {dx}, du = {du}, dt = {dt}')
-    timer.tic('datagen')
+    utils.timer.tic('datagen')
     us = jnp.linspace(u_left, u_right, nu, endpoint=False) # (nu,)
     xs = jnp.linspace(x_left, x_right, nx, endpoint=False) # (nx,)
     rng = hk.PRNGSequence(jax.random.PRNGKey(seed))
@@ -575,7 +576,7 @@ def test_bdd_randg_randrho0(nx, nt, nu_nx_ratio, if_plot = True):
     gs_coarse = gs[:,0::nu_nx_ratio]
     rho0_coarse = rho_0[:,0::nu_nx_ratio]
 
-    timer.toc('datagen')
+    utils.timer.toc('datagen')
 
     # solve it using optimization method for mfc
     mfc_config = mfc.get_config(nt, nx, diffusion_eps/2.0)  # NOTE: the parameter here is the coeff on Lap, hence eps/2
@@ -586,10 +587,10 @@ def test_bdd_randg_randrho0(nx, nt, nu_nx_ratio, if_plot = True):
     # warmup run
     x_batch, res_batch = mfc.forward_batch(nt, nx, mfc_config, rho0_coarse, gs_coarse, run_cost_batch, gamma = 0.2, 
                                               max_iters=mfc_iters, check_freq = 100, tol= mfc_tol, verbose=mfc_verbose)
-    timer.tic('mfc_solver_1')
+    utils.timer.tic('mfc_solver_1')
     x_batch, res_batch = mfc.forward_batch(nt, nx, mfc_config, rho0_coarse, gs_coarse, run_cost_batch, gamma = 0.2, 
                                               max_iters=mfc_iters, check_freq = 100, tol= mfc_tol, verbose=mfc_verbose)
-    timer.toc('mfc_solver_1')
+    utils.timer.toc('mfc_solver_1')
     print('mfc res batch {}'.format(jnp.max(res_batch)))
     assert jnp.all(res_batch < mfc_tol)
     rhos = einshape("i(mn)->imn", x_batch[:,:nt*nx], m = nt, n = nx) # (batch, nt, nx)
@@ -610,9 +611,9 @@ def test_bdd_randg_randrho0(nx, nt, nu_nx_ratio, if_plot = True):
     half_unroll_nums = get_half_unroll_nums(us, us, ts_all, terminal_t, diffusion_eps)
     # warmup run
     rho_all, phi_all = solve_mfc_periodic_batch(gs, us, rho_0, us, xs_all, ts_all, terminal_t, diffusion_eps, half_unroll_nums)
-    timer.tic('mfc_solver_2')
+    utils.timer.tic('mfc_solver_2')
     rho_all, phi_all = solve_mfc_periodic_batch(gs, us, rho_0, us, xs_all, ts_all, terminal_t, diffusion_eps, half_unroll_nums)
-    timer.toc('mfc_solver_2')
+    utils.timer.toc('mfc_solver_2')
     rho_ver2 = einshape("i(mn)->imn", rho_all, m = nx, n = nt+1) # (batch, nx, nt+1)
     phi_ver2 = einshape("i(mn)->imn", phi_all, m = nx, n = nt+1) # (batch, nx, nt+1)
     # compute residual and obj val in mfc

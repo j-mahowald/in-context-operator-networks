@@ -1,7 +1,8 @@
-from jax.config import config
+import jax
+config = jax.config
+# from jax.config import config
 config.update("jax_enable_x64", True)
 import jax.numpy as jnp
-import jax
 import weno_scheme
 import numpy as np
 import weno_roll

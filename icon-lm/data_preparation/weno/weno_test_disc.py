@@ -1,7 +1,8 @@
-from jax.config import config
+import jax
+config = jax.config
+# from jax.config import config
 config.update("jax_enable_x64", True)
 import jax.numpy as jnp
-import jax
 import numpy as np
 import matplotlib.pyplot as plt
 from weno_solver import generate_weno_scalar_sol, generate_weno_euler_sol

@@ -40,7 +40,7 @@ def serialize_element(equation, caption, cond_k, cond_v, qoi_k, qoi_v, count):
     if _print:
       print('-'*50, count, '-'*50, flush=True)
       print("equation: {}".format(equation), flush=True)
-      print("cond_k.shape: {}, cond_v.shape: {}, qoi_k.shape: {}, qoi_v.shape: {}".format(cond_k.shape, cond_v.shape, qoi_k.shape, qoi_v.shape), flush=True)
+      print("cond_k.shape:  {}, cond_v.shape: {}, qoi_k.shape: {}, qoi_v.shape: {}".format(cond_k.shape, cond_v.shape, qoi_k.shape, qoi_v.shape), flush=True)
 
     example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
     return example_proto.SerializeToString()
@@ -57,7 +57,7 @@ def write_ode_tfrecord(name, eqn_type, all_params, all_eqn_captions, all_ts, all
       for params, ts_expand, control, traj in zip(all_params, all_ts, all_cs, all_us):
         equation_name = "{}_forward_{}".format(eqn_type, params)
         cond_k_c = jnp.pad(ts_expand[:,:-1,:], ((0,0),(0,0),(0,1)), mode = 'constant', constant_values = 0.0)
-        cond_k_i = einshape('i->jki', jnp.array([0.0,1.0]), j = num, k = 1)
+        cond_k_i = einshape('i->jki', jnp.array([0.0,1.0]), j = num, k = 1) # Delineating the term (0 for control, 1 for initial condition)
         cond_k = jnp.concatenate([cond_k_c, cond_k_i], axis = 1)
         cond_v_c = control[:,:-1,:]
         cond_v_i = traj[:,0:1,:]

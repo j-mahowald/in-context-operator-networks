@@ -1,10 +1,12 @@
-from jax.config import config
+# from jax.config import config
+import jax
+import jax.numpy as jnp
+config = jax.config
 import os
 config.update('jax_enable_x64', True)
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
 import sys
-import jax
-import jax.numpy as jnp
+
 import numpy as np
 from functools import partial
 import plot

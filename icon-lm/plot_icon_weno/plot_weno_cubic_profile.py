@@ -94,7 +94,7 @@ def draw_profile(eqn_name, a, b, c, demo_num, title, case_idx = 0):
 if __name__ == "__main__":
   demo_num_list = [1,2,3,4,5]
 
-  folder = "/home/shared/icon/analysis/icon_weno_20231209-222440_light"
+  folder = "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_weno_20231209-222440_light"
   a,b,c = 0.5,0.5,0.5
   title = "$\partial_t u + \partial_x(0.5u^3 + 0.5u^2 + 0.5u) = 0$"
   for case_idx in range(5):

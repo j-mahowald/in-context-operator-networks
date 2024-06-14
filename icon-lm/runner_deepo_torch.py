@@ -154,7 +154,7 @@ def test(loss_mode):
   data_config['load_list'] = []
 
   data_provider = dataloader.DataProvider(seed = 1, config = data_config, 
-                              file_names = '/home/shared/icon/data/data0910c/train_pde*',
+                              file_names = '/workspace/Jamie/in-context-operator-networks/icon-lm/data/data0910c/train_pde*',
                               batch_size = 2, shuffle_buffer_size = 100,
                               num_devices = 0, real_time = True)
   

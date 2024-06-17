@@ -16,20 +16,25 @@ from einshape import numpy_einshape as einshape
 gpus = tf.config.list_physical_devices(device_type = 'GPU')
 print(gpus, flush=True)
 
+## Comments with two hashtags (##) are ones Jamie made, comments with one hashtag (#) are original comments
+
 def run_train():
+  ## Set seed and dataloader
   utils.set_seed(FLAGS.seed)
   from dataloader import DataProvider, print_eqn_caption, split_data # import in function to enable flags in dataloader
 
-  time_stamp = datetime.now(pytz.timezone('America/Los_Angeles')).strftime("%Y%m%d-%H%M%S")
+  time_stamp = datetime.now(pytz.timezone('America/Chicago')).strftime("%Y%m%d-%H%M%S")
   stamp = time_stamp
   print("stamp: {}".format(stamp))
 
+  ## Calculate warmup and decay steps
   train_warmup_steps = FLAGS.epochs * FLAGS.steps_per_epoch * FLAGS.train_warmup_percent // 100
   train_decay_steps = FLAGS.epochs * FLAGS.steps_per_epoch * FLAGS.train_decay_percent // 100
 
   print("train_decay_steps = {}".format(train_decay_steps), flush=True)
   print("train_warmup_steps = {}".format(train_warmup_steps), flush=True)
 
+  ## Specifies directories & glob patterns
   train_data_dirs = FLAGS.train_data_dirs
   if FLAGS.test_data_dirs is None:
     test_data_dirs = FLAGS.train_data_dirs
@@ -44,6 +49,7 @@ def run_train():
   print("test_file_names: ", flush=True)
   pprint(test_file_names)
 
+  ## Loads & parses config files
   train_config = utils.load_json("config_data/" + FLAGS.train_config_filename)
 
   if FLAGS.test_config_filename is None:
@@ -88,6 +94,7 @@ def run_train():
   pprint(model_config)
   print('-----------------------model config end-----------------------', flush=True)
 
+  ## Initializes optimizer based on backend
   if FLAGS.backend == 'jax':
     optimizer = utils.get_scheduled_adamw(peak_lr = FLAGS.train_peak_lr, 
                                           end_lr = FLAGS.train_end_lr,
@@ -107,6 +114,7 @@ def run_train():
                   }
     data_num_devices = 0
 
+  ## Initializes dataloader, visualization if needed
   train_data = DataProvider(seed = FLAGS.seed + 1,
                             config = train_config,
                             file_names = train_file_names,
@@ -148,6 +156,7 @@ def run_train():
   print_eqn_caption(equation, caption)
   print(tree.tree_map(lambda x: x.shape, data)) 
 
+  ## Specifies runner based on model 
   if FLAGS.model in ['icon']:
     from runner_jax import Runner_vanilla
     runner = Runner_vanilla(seed = FLAGS.seed,
@@ -184,32 +193,41 @@ def run_train():
   else:
     raise ValueError("model {} not supported".format(FLAGS.model))
 
+  ## Sets up checkpoint if specified
   if FLAGS.restore_dir is not None:
     runner.restore(FLAGS.restore_dir, FLAGS.restore_step, restore_opt_state=False)
     
   if FLAGS.tfboard:
-    results_dir = f'/home/shared/icon/save/{FLAGS.user}/results/{FLAGS.problem}/'+ stamp
+    results_dir = f'/workspace/Jamie/in-context-operator-networks/icon-lm/save/{FLAGS.user}/results/{FLAGS.problem}/'+ stamp
     file_writer = tf.summary.create_file_writer(results_dir)
     file_writer.set_as_default()
-    ckpt_dir = f'/home/shared/icon/save/{FLAGS.user}/ckpts/{FLAGS.problem}/'+ stamp
+    ckpt_dir = f'/workspace/Jamie/in-context-operator-networks/icon-lm/save/{FLAGS.user}/ckpts/{FLAGS.problem}/'+ stamp
     if not os.path.exists(ckpt_dir):
       os.makedirs(ckpt_dir)
 
+  ## Training loop
   utils.timer.tic("since last print")
+  
+  ## Main loop over steps 
   for _ in range(FLAGS.epochs * FLAGS.steps_per_epoch + 1):
+
+    ## Save at checkpoint if at save frequency
     if FLAGS.tfboard and runner.train_step % (FLAGS.save_freq) == 0:
-      logging.info("current time: " + datetime.now(pytz.timezone('America/Los_Angeles')).strftime("%Y%m%d-%H%M%S"))
+      logging.info("current time: " + datetime.now(pytz.timezone('America/Chicago')).strftime("%Y%m%d-%H%M%S"))
       runner.save(ckpt_dir)
     
+    ## LOSS & ERROR 
     # calculate, print and write loss to tfboard
     if FLAGS.profile_level == 0 and ((runner.train_step % FLAGS.loss_freq == 0)
-        or (runner.train_step % (FLAGS.loss_freq//10) == 0 and runner.train_step <= FLAGS.loss_freq) 
-        or (runner.train_step % (FLAGS.loss_freq//10) == 0 and runner.train_step >= FLAGS.epochs * FLAGS.steps_per_epoch - FLAGS.loss_freq)):
+        or (runner.train_step % (FLAGS.loss_freq//10) == 0 and runner.train_step <= FLAGS.loss_freq) ## Calculate frequently at the beginning
+        or (runner.train_step % (FLAGS.loss_freq//10) == 0 and runner.train_step >= FLAGS.epochs * FLAGS.steps_per_epoch - FLAGS.loss_freq)): 
+        ## Calculate frequently at the end
       print("==================== step: {}, loss start ====================".format(runner.train_step))
       utils.timer.toc("since last print")
       utils.timer.tic("since last print")
       utils.timer.tic("calculate, print and write loss to tfboard")
 
+      ## Calculates loss for training data
       for dataset in datasets:
         equation, caption, data, label = dataset.get_next_data(caption_max_len = model_config['caption_len'])
         this_loss = runner.get_loss(data, label)
@@ -218,6 +236,7 @@ def run_train():
         if FLAGS.tfboard:
           tf.summary.scalar(f'loss/{dataset.name}', this_loss_mean, step = runner.train_step)
           
+      ## Calculates error for test data 
       equation, caption, data, label = test_data.get_next_data(caption_max_len = model_config['caption_len'])
       for demo_num, caption_id, caption, data in split_data(caption, data, test_demo_num_list, test_caption_id_list):
         # without caption
@@ -240,10 +259,14 @@ def run_train():
       utils.timer.toc("calculate, print and write loss to tfboard")
       print("==================== step: {}, loss end ====================".format(runner.train_step))
 
-     # make prediction and plot to tfboard
+    ## PREDICTION & PLOT
+    # make prediction and plot to tfboard
+
     if FLAGS.profile_level == 0 and plot_num > 0 and ((runner.train_step % FLAGS.plot_freq == 0)
         or (runner.train_step % (FLAGS.plot_freq//10) == 0 and runner.train_step <= FLAGS.plot_freq)
         or (runner.train_step % (FLAGS.plot_freq//10) == 0 and runner.train_step >= FLAGS.epochs * FLAGS.steps_per_epoch - FLAGS.plot_freq)):
+
+      ## Displays dataset name for both training and testing data
       for dataset in [train_data, test_data]:
         print("==================== {} data: ==================== ".format(dataset.name), flush=True)
         for _ in range(FLAGS.print_eqn_caption_num):
@@ -251,7 +274,9 @@ def run_train():
           print_eqn_caption(equation, caption, decode = False)
         print("==================== {} data: ==================== ".format(dataset.name), flush=True)
 
-      utils.timer.tic("plot to tfboard")      
+      ## Starts timer for plotting
+      utils.timer.tic("plot to tfboard")    
+
       for dataset in datasets:
         equation, caption, data, label = dataset.get_next_data(caption_max_len = model_config['caption_len'])
         pred = runner.get_pred(data, with_caption=False) # (num_devices, batch_on_each_device, ...)

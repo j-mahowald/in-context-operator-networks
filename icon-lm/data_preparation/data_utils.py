@@ -42,8 +42,11 @@ def rbf_circle_kernel_jax(x1, x2, sigma, l):
     sq_norm = (xx1_1-xx2_1)**2/(l**2) + (xx1_2-xx2_2)**2/(l**2)
     return sigma**2 * jnp.exp(-0.5 * sq_norm)
 
-def rbf_kernel_3d(X1, X2, k_sigma, k_l):
-    sqdist = jnp.sum((X1[:, None, :] - X2[None, :, :]) ** 2, axis=-1)
+def rbf_kernel_3d(x1, x2, k_sigma, k_l):
+    '''
+    RBF kernel for 3D Gaussian process
+    '''
+    sqdist = jnp.sum((x1[:, None, :] - x2[None, :, :]) ** 2, axis=-1)
     return k_sigma * jnp.exp(-0.5 / k_l**2 * sqdist)
 
 @partial(jax.jit, static_argnames=('num','kernel'))
@@ -54,16 +57,18 @@ def generate_gaussian_process(key, ts, num, kernel, k_sigma, k_l):
   '''
   length = len(ts)
   mean = jnp.zeros((num,length))
-  # cov = rbf_kernel(ts[:, None], ts[:, None], sigma=k_sigma, l=k_l)
   cov = kernel(ts, ts, sigma=k_sigma, l=k_l)
   cov = einshape('ii->nii', cov, n = num)
   out = jax.random.multivariate_normal(key, mean=mean, cov=cov, shape=(num,), method='svd')
   return out
 
 def generate_gaussian_process_3d(key, ts, xs, num, kernel, k_sigma, k_l):
-    '''
+    '''x
     ts: 1D array (length,)
-    out: Gaussian process samples, 2D array (num, length)
+    xs: 1D array (length,)
+    out: Gaussian process samples, 3D array (num, length, length)
+    suggested k_sigma = 1.0, k_l = 0.2, kernel = rbf_kernel_3d
+
     '''
     X, T = jnp.meshgrid(xs, ts)
     points = jnp.vstack([X.ravel(), T.ravel()]).T

@@ -84,6 +84,15 @@ def solve_porous(L, N, u_left, u_right, a, k, c):
     return u
 
 @jax.jit
+def gradient_u(u, dx):
+    ux = (u[2:] - u[:-2]) / (2 * dx)
+    ux_left = (-3 * u[0] + 4 * u[1] - u[2]) / (2 * dx)
+    ux_right = (3 * u[-1] - 4 * u[-2] + u[-3]) / (2 * dx)
+    ux = jnp.pad(ux, (1, 1), mode='constant', constant_values=(ux_left, ux_right))
+    return ux
+gradient_u_batch = jax.jit(jax.vmap(gradient_u, in_axes=(0, None)))
+
+@jax.jit
 def laplace_u(u, dx):
   uxx = (u[:-2] + u[2:] - 2*u[1:-1])/dx**2 
   uxx_left = (2 * u[0] - 5 * u[1] + 4 * u[2] - u[3])/dx**2
@@ -91,6 +100,41 @@ def laplace_u(u, dx):
   uxx = jnp.pad(uxx, (1, 1), mode='constant', constant_values = (uxx_left, uxx_right))
   return uxx
 laplace_u_batch = jax.jit(jax.vmap(laplace_u, in_axes=(0, None)))
+
+@jax.jit
+def mixed_partial_derivative(u, dx, dt):
+    # Central difference for interior points
+    u_xt = (u[2:,2:] - u[2:,:-2] - u[:-2,2:] + u[:-2,:-2]) / (4 * dx * dt)
+    
+    # Handle boundaries
+    # Left and right edges (excluding corners)
+    u_xt_left = (-u[1:,2:] + u[1:,:-2] + u[:-1,2:] - u[:-1,:-2]) / (2 * dx * dt)
+    u_xt_right = (u[1:,2:] - u[1:,:-2] - u[:-1,2:] + u[:-1,:-2]) / (2 * dx * dt)
+    
+    # Top and bottom edges (excluding corners)
+    u_xt_top = (-u[2:,1:] + u[:-2,1:] + u[2:,:-1] - u[:-2,:-1]) / (2 * dx * dt)
+    u_xt_bottom = (u[2:,1:] - u[:-2,1:] - u[2:,:-1] + u[:-2,:-1]) / (2 * dx * dt)
+    
+    # Corners
+    u_xt_tl = (-u[1,1] + u[1,0] + u[0,1] - u[0,0]) / (dx * dt)
+    u_xt_tr = (u[1,-1] - u[1,-2] - u[0,-1] + u[0,-2]) / (dx * dt)
+    u_xt_bl = (u[-1,1] - u[-1,0] - u[-2,1] + u[-2,0]) / (dx * dt)
+    u_xt_br = (-u[-1,-1] + u[-1,-2] + u[-2,-1] - u[-2,-2]) / (dx * dt)
+    
+    # Pad the interior
+    u_xt = jnp.pad(u_xt, ((1,1), (1,1)), mode='constant')
+    
+    # Fill in the edges and corners
+    u_xt = u_xt.at[1:-1, 0].set(u_xt_left[:,0])
+    u_xt = u_xt.at[1:-1, -1].set(u_xt_right[:,-1])
+    u_xt = u_xt.at[0, 1:-1].set(u_xt_top[0,:])
+    u_xt = u_xt.at[-1, 1:-1].set(u_xt_bottom[-1,:])
+    u_xt = u_xt.at[0, 0].set(u_xt_tl)
+    u_xt = u_xt.at[0, -1].set(u_xt_tr)
+    u_xt = u_xt.at[-1, 0].set(u_xt_bl)
+    u_xt = u_xt.at[-1, -1].set(u_xt_br)
+    
+    return u_xt
 
 @partial(jax.jit, static_argnames=("N"))
 def solve_square(L, N, u, u_left, u_right, a, k):
@@ -128,10 +172,38 @@ def solve_cubic(L, N, u, u_left, u_right, a, k):
     c = -a * uxx+ k * new_u **3
     return new_u,c
 
+@partial(jax.jit, static_argnames=("N_t","N_x"))
+def solve_pde_linear_3d(L_x, L_t, N_x, N_t, uxt_GP, coeffs):
+    '''
+    To be honest, this is not really 'solving' anything. 
+    It is just applying the derivatives and the coefficients to the given u(x,t) to find g(x,t).
+    That's why it returns g(x,t) instead of u(x,t).
+    a*u_xx + b*u_xt + c*u_tt + d*u_x + e*u_t + f*u = g(x,t)
+    over domain [0,L_t] x [0,L_x]
+    coeffs: [a,b,c,d,e,f], constant parameters
+    c(x,t): spatially & temporally varying function, size (N_t-1, N_x-1)
+    no ul or ur parameters, boundary conditions are not considered
+    '''
+    dx = L_x / N_x
+    dt = L_t / N_t
+    laplace_u_2d_x = jax.vmap(laplace_u, in_axes=(0, None))
+    laplace_u_2d_t = jax.vmap(laplace_u, in_axes=(1, None))
+    gradient_u_2d_x = jax.vmap(gradient_u, in_axes=(0, None))
+    gradient_u_2d_t = jax.vmap(gradient_u, in_axes=(1, None))
+    u_xx = laplace_u_2d_x(uxt_GP, dx)
+    u_tt = laplace_u_2d_t(uxt_GP.T, dt).T
+    u_x = gradient_u_2d_x(uxt_GP, dx)
+    u_t = gradient_u_2d_t(uxt_GP.T, dt).T
+    u_xt = mixed_partial_derivative(uxt_GP, dx, dt)
+    a, b, c, d, e, f = coeffs
+    g = a * u_xx + b * u_xt + c * u_tt + d * u_x + e * u_t + f * uxt_GP
+    return g
+
 solve_poisson_batch = jax.jit(jax.vmap(solve_poisson, in_axes=(None, None, None, None, 0)), static_argnums=(1,))
 solve_porous_batch = jax.jit(jax.vmap(solve_porous, in_axes=(None, None, None, None, None, 0, None)), static_argnums=(1,))
 solve_square_batch = jax.jit(jax.vmap(solve_square, in_axes=(None, None, 0, None, None, None, None)), static_argnums=(1,))
 solve_cubic_batch = jax.jit(jax.vmap(solve_cubic, in_axes=(None, None, 0, None, None, None, None)), static_argnums=(1,))
+solve_pde_linear_3d_batch = jax.jit(jax.vmap(solve_pde_linear_3d, in_axes=(None, None, None, None, 0, 0)), static_argnums=(2,3))
 
 if __name__ == "__main__":
     import numpy as np

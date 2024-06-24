@@ -145,7 +145,7 @@ if __name__ == "__main__":
   flags.DEFINE_integer('eqns', 100, 'number of equations')
   flags.DEFINE_integer('length', 100, 'length of trajectory and control')
   flags.DEFINE_float('dt', 0.001, 'time step in dynamics')
-  flags.DEFINE_float('dx', 0.01, 'time step in dynamics')
+  flags.DEFINE_float('dx', 0.01, 'spatial step in dynamics')
   flags.DEFINE_string('name', 'data', 'name of the dataset')
   flags.DEFINE_string('dir', '.', 'name of the directory to save the data')
   flags.DEFINE_list('eqn_types', ['weno_cubic'], 'list of equations for data generation')

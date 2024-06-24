@@ -272,3 +272,45 @@ def write_mfc_rhoparam_hj_tfrecord(name, eqn_type, all_params, all_eqn_captions,
           writer.write(s_element)
         else:
           raise Exception("NaN found!")
+
+def write_pde_3d(name, eqn_type, all_params, all_eqn_captions, all_xs, all_ts, all_gs, all_us, problem_type):
+    if problem_type not in ["forward", "inverse"]:
+        raise ValueError(f"Invalid problem_type: {problem_type}. Must be either 'forward' or 'inverse'.")
+
+    filename = f"{name}_{eqn_type}_{problem_type}.tfrecord"
+    print(f"==========={filename}===========", flush=True)
+    
+    with tf.io.TFRecordWriter(filename) as writer:
+        count = 0
+        for params, eqn_captions, xs, ts, gs, us in zip(all_params, all_eqn_captions, all_xs, all_ts, all_gs, all_us):
+            equation_name = f"{eqn_type}_{problem_type}_{params}"
+            caption = eqn_captions
+
+            # Prepare coordinate arrays
+            x_coords = xs[0, 0, :, 0]  # (N_x+1,)
+            t_coords = ts[0, :, 0, 0]  # (N_t+1,)
+
+            # Combine x and t coordinates
+            xt_coords = np.array(np.meshgrid(x_coords, t_coords)).T.reshape(-1, 2)  # ((N_x+1)*(N_t+1), 2)
+
+            for i in range(us.shape[0]):  # iterate over 'num' dimension
+                count += 1
+                if not np.isnan(np.sum(us[i])) and not np.isnan(np.sum(gs[i])):
+                    g_values = gs[i].reshape(-1)  # ((N_x+1)*(N_t+1),)
+                    u_values = us[i].reshape(-1)  # ((N_x+1)*(N_t+1),)
+
+                    if problem_type == "forward":
+                        cond_v, qoi_v = g_values, u_values
+                    else:  # backward
+                        cond_v, qoi_v = u_values, g_values
+
+                    s_element = serialize_element(
+                        equation=equation_name,
+                        caption=caption,
+                        cond_k=xt_coords,
+                        cond_v=cond_v,
+                        qoi_k=xt_coords,
+                        qoi_v=qoi_v,
+                        count=count
+                    )
+                    writer.write(s_element)

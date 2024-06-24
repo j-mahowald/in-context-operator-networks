@@ -108,12 +108,12 @@ def mixed_partial_derivative(u, dx, dt):
     
     # Handle boundaries
     # Left and right edges (excluding corners)
-    u_xt_left = (-u[1:,2:] + u[1:,:-2] + u[:-1,2:] - u[:-1,:-2]) / (2 * dx * dt)
-    u_xt_right = (u[1:,2:] - u[1:,:-2] - u[:-1,2:] + u[:-1,:-2]) / (2 * dx * dt)
+    u_xt_left = (-u[1:,1:-1] + u[1:,:-2] + u[:-1,1:-1] - u[:-1,:-2]) / (2 * dx * dt)
+    u_xt_right = (u[1:,2:] - u[1:,1:-1] - u[:-1,2:] + u[:-1,1:-1]) / (2 * dx * dt)
     
     # Top and bottom edges (excluding corners)
-    u_xt_top = (-u[2:,1:] + u[:-2,1:] + u[2:,:-1] - u[:-2,:-1]) / (2 * dx * dt)
-    u_xt_bottom = (u[2:,1:] - u[:-2,1:] - u[2:,:-1] + u[:-2,:-1]) / (2 * dx * dt)
+    u_xt_top = (-u[1:-1,1:] + u[1:-1,:-1] + u[:-2,1:] - u[:-2,:-1]) / (2 * dx * dt)
+    u_xt_bottom = (u[2:,1:] - u[2:,:-1] - u[1:-1,1:] + u[1:-1,:-1]) / (2 * dx * dt)
     
     # Corners
     u_xt_tl = (-u[1,1] + u[1,0] + u[0,1] - u[0,0]) / (dx * dt)
@@ -194,7 +194,8 @@ def solve_pde_linear_3d(L_x, L_t, N_x, N_t, uxt_GP, coeffs):
     u_tt = laplace_u_2d_t(uxt_GP.T, dt).T
     u_x = gradient_u_2d_x(uxt_GP, dx)
     u_t = gradient_u_2d_t(uxt_GP.T, dt).T
-    u_xt = mixed_partial_derivative(uxt_GP, dx, dt)
+    u_xt = gradient_u_2d_t(u_x.T, dt).T
+    # u_xt = mixed_partial_derivative(uxt_GP, dx, dt)
     a, b, c, d, e, f = coeffs
     g = a * u_xx + b * u_xt + c * u_tt + d * u_x + e * u_t + f * uxt_GP
     return g
@@ -203,7 +204,7 @@ solve_poisson_batch = jax.jit(jax.vmap(solve_poisson, in_axes=(None, None, None,
 solve_porous_batch = jax.jit(jax.vmap(solve_porous, in_axes=(None, None, None, None, None, 0, None)), static_argnums=(1,))
 solve_square_batch = jax.jit(jax.vmap(solve_square, in_axes=(None, None, 0, None, None, None, None)), static_argnums=(1,))
 solve_cubic_batch = jax.jit(jax.vmap(solve_cubic, in_axes=(None, None, 0, None, None, None, None)), static_argnums=(1,))
-solve_pde_linear_3d_batch = jax.jit(jax.vmap(solve_pde_linear_3d, in_axes=(None, None, None, None, 0, 0)), static_argnums=(2,3))
+solve_pde_linear_3d_batch = jax.jit(jax.vmap(solve_pde_linear_3d, in_axes=(None, None, None, None, 0, None)), static_argnums=(2,3))
 
 if __name__ == "__main__":
     import numpy as np

@@ -62,8 +62,8 @@ def generate_gaussian_process(key, ts, num, kernel, k_sigma, k_l):
   out = jax.random.multivariate_normal(key, mean=mean, cov=cov, shape=(num,), method='svd')
   return out
 
-def generate_gaussian_process_3d(key, ts, xs, num, kernel, k_sigma, k_l):
-    '''x
+def generate_gaussian_process_3d(key, xs, ts, num, kernel, k_sigma, k_l):
+    '''
     ts: 1D array (length,)
     xs: 1D array (length,)
     out: Gaussian process samples, 3D array (num, length, length)
@@ -77,5 +77,5 @@ def generate_gaussian_process_3d(key, ts, xs, num, kernel, k_sigma, k_l):
     mean = jnp.zeros(cov.shape[0])
     cov = einshape('ii->nii', cov, n=num)
     u_sample = jax.random.multivariate_normal(key, mean=mean, cov=cov, shape=(num,), method='svd')
-    out = u_sample.reshape((num, X.shape[0], X.shape[1]))
+    out = u_sample.reshape((num, X.shape[0], X.shape[1])) # (num, N_x+1, N_t+1)
     return out

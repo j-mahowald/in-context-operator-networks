@@ -103,37 +103,38 @@ laplace_u_batch = jax.jit(jax.vmap(laplace_u, in_axes=(0, None)))
 
 @jax.jit
 def mixed_partial_derivative(u, dx, dt):
+    # u is a 2D array of shape (N_x+1, N_t+1)
+
     # Central difference for interior points
-    u_xt = (u[2:,2:] - u[2:,:-2] - u[:-2,2:] + u[:-2,:-2]) / (4 * dx * dt)
-    
-    # Handle boundaries
-    # Left and right edges (excluding corners)
-    u_xt_left = (-u[1:,1:-1] + u[1:,:-2] + u[:-1,1:-1] - u[:-1,:-2]) / (2 * dx * dt)
-    u_xt_right = (u[1:,2:] - u[1:,1:-1] - u[:-1,2:] + u[:-1,1:-1]) / (2 * dx * dt)
-    
-    # Top and bottom edges (excluding corners)
-    u_xt_top = (-u[1:-1,1:] + u[1:-1,:-1] + u[:-2,1:] - u[:-2,:-1]) / (2 * dx * dt)
-    u_xt_bottom = (u[2:,1:] - u[2:,:-1] - u[1:-1,1:] + u[1:-1,:-1]) / (2 * dx * dt)
-    
+    u_xt = (u[2:, 2:] - u[:-2, 2:] - u[2:, :-2] + u[:-2, :-2]) / (4 * dx * dt)
+
+    # Top & bottom edges (no corner), 1D array of length (N_t-1)
+    u_xt_top = (u[1, 2:] - u[0, 2:] - u[1, :-2] + u[0, :-2]) / (2 * dx * dt)
+    u_xt_bottom = (u[-1, 2:] - u[-2, 2:] - u[-1, :-2] + u[-2, :-2]) / (2 * dx * dt)
+
+    # Left & right edges (no corner), 1D array of length (N_x-1)
+    u_xt_left = (u[2:,1] - u[:-2, 1] - u[2:, 0] + u[:-2, 0]) / (2 * dx * dt)
+    u_xt_right = (u[2:, -1] - u[:-2, -1] - u[2:, -2] + u[:-2, -2]) / (2 * dx * dt)
+
     # Corners
-    u_xt_tl = (-u[1,1] + u[1,0] + u[0,1] - u[0,0]) / (dx * dt)
-    u_xt_tr = (u[1,-1] - u[1,-2] - u[0,-1] + u[0,-2]) / (dx * dt)
-    u_xt_bl = (u[-1,1] - u[-1,0] - u[-2,1] + u[-2,0]) / (dx * dt)
-    u_xt_br = (-u[-1,-1] + u[-1,-2] + u[-2,-1] - u[-2,-2]) / (dx * dt)
-    
+    u_xt_tl = (u[1,1] - u[0,1] - u[1,0] + u[0,0]) / (dx * dt)
+    u_xt_tr = (u[1, -1] - u[0, -1] - u[1, -2] + u[0, -2]) / (dx * dt)
+    u_xt_br = (u[-1, -1] - u[-1, -2] - u[-2, -1] + u[-2, -2]) / (dx * dt)
+    u_xt_bl = (u[-1, 1] - u[-2, 1] - u[-1, 0] + u[-2, 0]) / (dx * dt)
+
     # Pad the interior
-    u_xt = jnp.pad(u_xt, ((1,1), (1,1)), mode='constant')
-    
+    u_xt = jnp.pad(u_xt, ((1, 1), (1, 1)), mode='constant')
+
     # Fill in the edges and corners
-    u_xt = u_xt.at[1:-1, 0].set(u_xt_left[:,0])
-    u_xt = u_xt.at[1:-1, -1].set(u_xt_right[:,-1])
-    u_xt = u_xt.at[0, 1:-1].set(u_xt_top[0,:])
-    u_xt = u_xt.at[-1, 1:-1].set(u_xt_bottom[-1,:])
+    u_xt = u_xt.at[0, 1:-1].set(u_xt_top)
+    u_xt = u_xt.at[-1, 1:-1].set(u_xt_bottom)
+    u_xt = u_xt.at[1:-1, 0].set(u_xt_left)
+    u_xt = u_xt.at[1:-1, -1].set(u_xt_right)
     u_xt = u_xt.at[0, 0].set(u_xt_tl)
     u_xt = u_xt.at[0, -1].set(u_xt_tr)
-    u_xt = u_xt.at[-1, 0].set(u_xt_bl)
     u_xt = u_xt.at[-1, -1].set(u_xt_br)
-    
+    u_xt = u_xt.at[-1, 0].set(u_xt_bl)
+
     return u_xt
 
 @partial(jax.jit, static_argnames=("N"))
@@ -194,8 +195,7 @@ def solve_pde_linear_3d(L_x, L_t, N_x, N_t, uxt_GP, coeffs):
     u_tt = laplace_u_2d_t(uxt_GP.T, dt).T
     u_x = gradient_u_2d_x(uxt_GP, dx)
     u_t = gradient_u_2d_t(uxt_GP.T, dt).T
-    u_xt = gradient_u_2d_t(u_x.T, dt).T
-    # u_xt = mixed_partial_derivative(uxt_GP, dx, dt)
+    u_xt = mixed_partial_derivative(uxt_GP, dx, dt)
     a, b, c, d, e, f = coeffs
     g = a * u_xx + b * u_xt + c * u_tt + d * u_x + e * u_t + f * uxt_GP
     return g

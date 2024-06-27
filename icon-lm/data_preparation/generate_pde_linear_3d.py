@@ -16,7 +16,7 @@ import data_series as series
 import data_pdes as pdes
 import data_mfc_hj as mfc_hj
 import data_writetfrecord as datawrite
-import data_utils
+import data_utils as dutils
 
 import tensorflow as tf
 
@@ -28,6 +28,7 @@ def generate_pde_linear_3d(seed, eqns, quests, length_x, length_t, dx, dt, num, 
   '''
   Generate PDE data for linear PDEs
   a*u_xx + b*u_xt + c*u_tt + d*u_x + e*u_t + f*u = g(x,t)
+  initial conditions u(x,0) = u_left, u(x,length_t*dt) = u_right
   '''
 
   rng = hk.PRNGSequence(jax.random.PRNGKey(seed))
@@ -35,32 +36,46 @@ def generate_pde_linear_3d(seed, eqns, quests, length_x, length_t, dx, dt, num, 
   L_x, L_t = [N_x * dx, N_t * dt]
     
   coeffs = [jax.random.uniform(next(rng), (eqns,), minval=-1, maxval=1) for _ in range(6)]
-  coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, coeffs_f = coeffs
+  coeffs = jnp.stack(coeffs, axis=1)
+
+  # Create a list of eqns pairs of initial conditions
+  u_inits = dutils.generate_gaussian_process(next(rng), jnp.linspace(0, 1, N_x+1), 2*eqns, dutils.rbf_kernel_jax, 2, 0.2)
+  u_inits = u_inits.reshape(eqns, 2, N_x+1)
 
   all_xs = []; all_ts = []; all_us = []; all_gs = []; all_params = []; all_eqn_captions = []
-  for i, (coeff_a, coeff_b, coeff_c, coeff_d, coeff_e, coeff_f) in enumerate(zip(coeffs_a, coeffs_b, coeffs_c, coeffs_d, coeffs_e, coeffs_f)):
+  for i in range(eqns):
+
+    coeff_a, coeff_b, coeff_c, coeff_d, coeff_e, coeff_f = coeffs[i]
+
+    # u_left, u_right = dutils.generate_gaussian_process(next(rng), jnp.linspace(0, 1, N_x+1), 2, dutils.rbf_kernel_jax, 2, 0.2)
+    u_left, u_right = u_inits[i]
+
     for j in range(quests):
       xs = jnp.linspace(0.0, 1.0, N_x+1)# (N+1,)
       ts = jnp.linspace(0.0, 1.0, N_t+1)# (N+1,)
-      uxt_GP = data_utils.generate_gaussian_process_3d(key = next(rng), xs = xs, ts = ts, num = num, 
-                                                       kernel = data_utils.rbf_kernel_3d, k_sigma = 1.0, k_l = 0.2) # (num, N_x+1, N_t+1)
-      uxt_GP = uxt_GP.reshape(num, N_t+1, N_x+1)
-      coeffs = [coeff_a, coeff_b, coeff_c, coeff_d, coeff_e, coeff_f]
-      # Check if uxt_GP.shape() is (num, N+1, N+1)
-      g = pdes.solve_pde_linear_3d_batch(L_x, L_t, N_x, N_t, uxt_GP, coeffs) # (num, N+1, N+1)
-      all_xs.append(einshape("i->jkil", xs, j=num, k=N_t+1, l=1))  # (num, N_t+1, N_x+1, 1)
-      all_ts.append(einshape("i->jkil", ts, j=num, k=N_x+1, l=1))  # (num, N_x+1, N_t+1, 1)
-      all_gs.append(einshape("ijk->ijkl", g, l=1))  # (num, N_t+1, N_x+1, 1)
-      all_us.append(einshape("ijk->ijkl", uxt_GP, l=1))  # (num, N_t+1, N_x+1, 1)
-      all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}".format(*coeffs))
-      all_eqn_captions.append(None)
-    print_dot(i)
+      uxt_GP = dutils.generate_gaussian_process_3d(key = next(rng), xs = xs, ts = ts, num = num, 
+                                                       kernel = dutils.rbf_kernel_3d, k_sigma = 1.0, k_l = 0.2) # (num, N_x+1, N_t+1)
+      uxt_GP = uxt_GP.reshape(num, N_x+1, N_t+1)
 
-    for ptype in ["forward", "inverse"]:
-      datawrite.write_pde_3d(name=name, eqn_type="pde_linear_3d",
-                                    all_params=all_params, all_eqn_captions=all_eqn_captions,
-                                    all_xs=all_xs, all_ts=all_ts, all_gs=all_gs, all_us=all_us,
-                                    problem_type=ptype)
+      # Check if uxt_GP.shape() is (num, N_x+1, N_t+1)
+
+      coeffs_list = [coeff_a, coeff_b, coeff_c, coeff_d, coeff_e, coeff_f]
+      coeffs_pass = jnp.array(coeffs_list)
+
+      new_uxt_GP, g = pdes.solve_pde_linear_3d_batch(L_x, L_t, N_x, N_t, uxt_GP, coeffs_pass, u_left, u_right) # (num, N+1, N+1)
+      all_xs.append(einshape("i->jikl", xs, j=num, k=N_t+1, l=1))  # (num, N_x+1, N_t+1, 1)
+      all_ts.append(einshape("i->jkil", ts, j=num, k=N_x+1, l=1))  # (num, N_x+1, N_t+1, 1)
+      all_gs.append(einshape("ijk->ijkl", g, l=1))  # (num, N_x+1, N_t+1, 1)
+      all_us.append(einshape("ijk->ijkl", new_uxt_GP, l=1))  # (num, N_x+1, N_t+1, 1)
+      all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}".format(coeff_a, coeff_b, coeff_c, coeff_d, coeff_e, coeff_f))
+      all_eqn_captions.append(None)
+    print('.', end='', flush=True)
+
+  for ptype in ["forward", "inverse"]:
+    datawrite.write_pde_3d(name=name, eqn_type="pde_linear_3d",
+                                  all_params=all_params, all_eqn_captions=all_eqn_captions,
+                                  all_xs=all_xs, all_ts=all_ts, all_gs=all_gs, all_us=all_us,
+                                  problem_type=ptype)
 
 def main(argv):
   for key, value in FLAGS.__flags.items():

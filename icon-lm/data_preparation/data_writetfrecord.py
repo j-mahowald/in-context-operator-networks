@@ -287,30 +287,31 @@ def write_pde_3d(name, eqn_type, all_params, all_eqn_captions, all_xs, all_ts, a
             caption = eqn_captions
 
             # Prepare coordinate arrays
-            x_coords = xs[0, 0, :, 0]  # (N_x+1,)
-            t_coords = ts[0, :, 0, 0]  # (N_t+1,)
+            num_samples, N_x, N_t, _ = xs.shape
+            x_coords = xs[0, :, 0, 0]  # (N_x,)
+            t_coords = ts[0, 0, :, 0]  # (N_t,)
 
             # Combine x and t coordinates
-            xt_coords = np.array(np.meshgrid(x_coords, t_coords)).T.reshape(-1, 2)  # ((N_x+1)*(N_t+1), 2)
+            xt_grid = np.array(np.meshgrid(x_coords, t_coords, indexing='ij')).transpose(1, 2, 0)  # (N_x, N_t, 2)
+            xt_coords = np.tile(xt_grid, (num_samples, 1, 1, 1))  # (num, N_x, N_t, 2)
+            xt_coords = xt_coords.reshape(num_samples, N_x * N_t, 2)  # (num, N_x * N_t, 2)
 
-            for i in range(us.shape[0]):  # iterate over 'num' dimension
-                count += 1
-                if not np.isnan(np.sum(us[i])) and not np.isnan(np.sum(gs[i])):
-                    g_values = gs[i].reshape(-1)  # ((N_x+1)*(N_t+1),)
-                    u_values = us[i].reshape(-1)  # ((N_x+1)*(N_t+1),)
+            count += 1
+            g_values = gs.squeeze(axis=-1).reshape(num_samples, N_x * N_t, 1)  # (num, N_x * N_t, 1)
+            u_values = us.squeeze(axis=-1).reshape(num_samples, N_x * N_t, 1)  # (num, N_x * N_t, 1)
 
-                    if problem_type == "forward":
-                        cond_v, qoi_v = g_values, u_values
-                    else:  # backward
-                        cond_v, qoi_v = u_values, g_values
+            if problem_type == "forward":
+                cond_v, qoi_v = g_values, u_values
+            else:  # inverse
+                cond_v, qoi_v = u_values, g_values
 
-                    s_element = serialize_element(
-                        equation=equation_name,
-                        caption=caption,
-                        cond_k=xt_coords,
-                        cond_v=cond_v,
-                        qoi_k=xt_coords,
-                        qoi_v=qoi_v,
-                        count=count
-                    )
-                    writer.write(s_element)
+            s_element = serialize_element(
+                equation=equation_name,
+                caption=caption,
+                cond_k=xt_coords,
+                cond_v=cond_v,
+                qoi_k=xt_coords,
+                qoi_v=qoi_v,
+                count=count
+            )
+            writer.write(s_element)

@@ -1,37 +1,11 @@
-from jax import lax
 import jax.numpy as jnp
 from functools import partial
 from einshape import jax_einshape as einshape
 from collections import namedtuple
 import jax
+import data_utils as dutils 
 jax.config.update("jax_enable_x64", True)
 
-def tridiagonal_solve(dl, d, du, b): 
-  """Pure JAX implementation of `tridiagonal_solve`.""" 
-  prepend_zero = lambda x: jnp.append(jnp.zeros([1], dtype=x.dtype), x[:-1]) 
-  fwd1 = lambda tu_, x: x[1] / (x[0] - x[2] * tu_) 
-  fwd2 = lambda b_, x: (x[0] - x[3] * b_) / (x[1] - x[3] * x[2]) 
-  bwd1 = lambda x_, x: x[0] - x[1] * x_ 
-  double = lambda f, args: (f(*args), f(*args)) 
-
-  # Forward pass. 
-  _, tu_ = lax.scan(lambda tu_, x: double(fwd1, (tu_, x)), 
-                    du[0] / d[0], 
-                    (d, du, dl), 
-                    unroll=32) 
-
-  _, b_ = lax.scan(lambda b_, x: double(fwd2, (b_, x)), 
-                  b[0] / d[0], 
-                  (b, d, prepend_zero(tu_), dl), 
-                  unroll=32) 
-
-  # Backsubstitution. 
-  _, x_ = lax.scan(lambda x_, x: double(bwd1, (x_, x)), 
-                  b_[-1], 
-                  (b_[::-1], tu_[::-1]), 
-                  unroll=32) 
-
-  return x_[::-1] 
 
 @partial(jax.jit, static_argnames=("N"))
 def solve_poisson(L, N, u_left, u_right, c):
@@ -53,7 +27,7 @@ def solve_poisson(L, N, u_left, u_right, c):
     b = b.at[0].add(-u_left)
     b = b.at[-1].add(-u_right)
 
-    out_u = tridiagonal_solve(dl, d, du, b)
+    out_u = dutils.tridiagonal_solve(dl, d, du, b)
     u = jnp.pad(out_u, (1, 1), mode='constant', constant_values=(u_left, u_right))
     return u
 
@@ -79,63 +53,9 @@ def solve_porous(L, N, u_left, u_right, a, k, c):
     b = b.at[0].add(a * u_left)
     b = b.at[-1].add(a * u_right)
 
-    out_u = tridiagonal_solve(dl, d, du, b)
+    out_u = dutils.tridiagonal_solve(dl, d, du, b)
     u = jnp.pad(out_u, (1, 1), mode='constant', constant_values=(u_left, u_right))
     return u
-
-@jax.jit
-def gradient_u(u, dx):
-    ux = (u[2:] - u[:-2]) / (2 * dx)
-    ux_left = (-3 * u[0] + 4 * u[1] - u[2]) / (2 * dx)
-    ux_right = (3 * u[-1] - 4 * u[-2] + u[-3]) / (2 * dx)
-    ux = jnp.pad(ux, (1, 1), mode='constant', constant_values=(ux_left, ux_right))
-    return ux
-gradient_u_batch = jax.jit(jax.vmap(gradient_u, in_axes=(0, None)))
-
-@jax.jit
-def laplace_u(u, dx):
-  uxx = (u[:-2] + u[2:] - 2*u[1:-1])/dx**2 
-  uxx_left = (2 * u[0] - 5 * u[1] + 4 * u[2] - u[3])/dx**2
-  uxx_right = (2 * u[-1] - 5 * u[-2] + 4 * u[-3] - u[-4])/dx**2
-  uxx = jnp.pad(uxx, (1, 1), mode='constant', constant_values = (uxx_left, uxx_right))
-  return uxx
-laplace_u_batch = jax.jit(jax.vmap(laplace_u, in_axes=(0, None)))
-
-@jax.jit
-def mixed_partial_derivative(u, dx, dt):
-    # u is a 2D array of shape (N_x+1, N_t+1)
-
-    # Central difference for interior points
-    u_xt = (u[2:, 2:] - u[:-2, 2:] - u[2:, :-2] + u[:-2, :-2]) / (4 * dx * dt)
-
-    # Top & bottom edges (no corner), 1D array of length (N_t-1)
-    u_xt_top = (u[1, 2:] - u[0, 2:] - u[1, :-2] + u[0, :-2]) / (2 * dx * dt)
-    u_xt_bottom = (u[-1, 2:] - u[-2, 2:] - u[-1, :-2] + u[-2, :-2]) / (2 * dx * dt)
-
-    # Left & right edges (no corner), 1D array of length (N_x-1)
-    u_xt_left = (u[2:,1] - u[:-2, 1] - u[2:, 0] + u[:-2, 0]) / (2 * dx * dt)
-    u_xt_right = (u[2:, -1] - u[:-2, -1] - u[2:, -2] + u[:-2, -2]) / (2 * dx * dt)
-
-    # Corners
-    u_xt_tl = (u[1,1] - u[0,1] - u[1,0] + u[0,0]) / (dx * dt)
-    u_xt_tr = (u[1, -1] - u[0, -1] - u[1, -2] + u[0, -2]) / (dx * dt)
-    u_xt_br = (u[-1, -1] - u[-1, -2] - u[-2, -1] + u[-2, -2]) / (dx * dt)
-    u_xt_bl = (u[-1, 1] - u[-2, 1] - u[-1, 0] + u[-2, 0]) / (dx * dt)
-
-    # Pad the interior
-    u_xt = jnp.pad(u_xt, ((1, 1), (1, 1)), mode='constant')
-
-    # Fill in the edges and corners
-    u_xt = u_xt.at[0, 1:-1].set(u_xt_top)
-    u_xt = u_xt.at[-1, 1:-1].set(u_xt_bottom)
-    u_xt = u_xt.at[1:-1, 0].set(u_xt_left)
-    u_xt = u_xt.at[1:-1, -1].set(u_xt_right)
-    u_xt = u_xt.at[0, 0].set(u_xt_tl)
-    u_xt = u_xt.at[0, -1].set(u_xt_tr)
-    u_xt = u_xt.at[-1, -1].set(u_xt_br)
-    u_xt = u_xt.at[-1, 0].set(u_xt_bl)
-
-    return u_xt
 
 @partial(jax.jit, static_argnames=("N"))
 def solve_square(L, N, u, u_left, u_right, a, k):
@@ -151,7 +71,7 @@ def solve_square(L, N, u, u_left, u_right, a, k):
     '''
     dx = L / N
     new_u = u + jnp.linspace(u_left - u[0], u_right - u[-1], N+1)
-    uxx = laplace_u(new_u, dx)
+    uxx = dutils.laplace_u(new_u, dx)
     c = -a * uxx+ k * new_u **2
     return new_u,c
     
@@ -169,12 +89,12 @@ def solve_cubic(L, N, u, u_left, u_right, a, k):
     '''
     dx = L / N
     new_u = u + jnp.linspace(u_left - u[0], u_right - u[-1], N+1)
-    uxx = laplace_u(new_u, dx)
+    uxx = dutils.laplace_u(new_u, dx)
     c = -a * uxx+ k * new_u **3
     return new_u,c
 
 @partial(jax.jit, static_argnames=("N_t","N_x"))
-def solve_pde_linear_3d(L_x, L_t, N_x, N_t, uxt_GP, coeffs):
+def solve_pde_linear_3d(L_x, L_t, N_x, N_t, uxt_GP, coeffs, u_left, u_right):
     '''
     To be honest, this is not really 'solving' anything. 
     It is just applying the derivatives and the coefficients to the given u(x,t) to find g(x,t).
@@ -183,28 +103,30 @@ def solve_pde_linear_3d(L_x, L_t, N_x, N_t, uxt_GP, coeffs):
     over domain [0,L_t] x [0,L_x]
     coeffs: [a,b,c,d,e,f], constant parameters
     c(x,t): spatially & temporally varying function, size (N_t-1, N_x-1)
-    no ul or ur parameters, boundary conditions are not considered
     '''
+
+    new_uxt_GP = dutils.apply_initial_conditions(uxt_GP, u_left, u_right) # (N_x+1, N_t+1)
+
     dx = L_x / N_x
     dt = L_t / N_t
-    laplace_u_2d_x = jax.vmap(laplace_u, in_axes=(0, None))
-    laplace_u_2d_t = jax.vmap(laplace_u, in_axes=(1, None))
-    gradient_u_2d_x = jax.vmap(gradient_u, in_axes=(0, None))
-    gradient_u_2d_t = jax.vmap(gradient_u, in_axes=(1, None))
-    u_xx = laplace_u_2d_x(uxt_GP, dx)
-    u_tt = laplace_u_2d_t(uxt_GP.T, dt).T
-    u_x = gradient_u_2d_x(uxt_GP, dx)
-    u_t = gradient_u_2d_t(uxt_GP.T, dt).T
-    u_xt = mixed_partial_derivative(uxt_GP, dx, dt)
+    laplace_u_2d_x  = jax.vmap(dutils.laplace_u, in_axes=(0, None))
+    laplace_u_2d_t = jax.vmap(dutils.laplace_u, in_axes=(1, None))
+    gradient_u_2d_x = jax.vmap(dutils.gradient_u, in_axes=(0, None))
+    gradient_u_2d_t = jax.vmap(dutils.gradient_u, in_axes=(1, None))
+    u_xx = laplace_u_2d_x(new_uxt_GP, dx)
+    u_tt = laplace_u_2d_t(new_uxt_GP.T, dt).T
+    u_x = gradient_u_2d_x(new_uxt_GP, dx)
+    u_t = gradient_u_2d_t(new_uxt_GP.T, dt).T
+    u_xt = dutils.mixed_partial_derivative(new_uxt_GP, dx, dt)
     a, b, c, d, e, f = coeffs
-    g = a * u_xx + b * u_xt + c * u_tt + d * u_x + e * u_t + f * uxt_GP
-    return g
+    g = a * u_xx + b * u_xt + c * u_tt + d * u_x + e * u_t + f * new_uxt_GP # (N_x+1, N_t+1)
+    return new_uxt_GP, g
 
 solve_poisson_batch = jax.jit(jax.vmap(solve_poisson, in_axes=(None, None, None, None, 0)), static_argnums=(1,))
 solve_porous_batch = jax.jit(jax.vmap(solve_porous, in_axes=(None, None, None, None, None, 0, None)), static_argnums=(1,))
 solve_square_batch = jax.jit(jax.vmap(solve_square, in_axes=(None, None, 0, None, None, None, None)), static_argnums=(1,))
 solve_cubic_batch = jax.jit(jax.vmap(solve_cubic, in_axes=(None, None, 0, None, None, None, None)), static_argnums=(1,))
-solve_pde_linear_3d_batch = jax.jit(jax.vmap(solve_pde_linear_3d, in_axes=(None, None, None, None, 0, None)), static_argnums=(2,3))
+solve_pde_linear_3d_batch = jax.jit(jax.vmap(solve_pde_linear_3d, in_axes=(None, None, None, None, 0, None, None, None)), static_argnums=(0,1,2,3))
 
 if __name__ == "__main__":
     import numpy as np

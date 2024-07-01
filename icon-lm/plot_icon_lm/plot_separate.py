@@ -119,9 +119,9 @@ def draw_seperate(folder, demo_num_list, caption_id, title):
 
 def plot_hero_sep():
   stamp = FLAGS.ckpt+"-testdata-testcap"
-  draw_seperate(folder = "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/{}-nocap".format(stamp),   demo_num_list = [0,1,2,3,4,5], caption_id = -1, title = 'no caption')
-  draw_seperate(folder = "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/{}-vague".format(stamp),   demo_num_list = [0,1,2,3,4,5], caption_id = 0, title = 'vague caption')
-  draw_seperate(folder = "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/{}-precise".format(stamp), demo_num_list = [0,1,2,3,4,5], caption_id = 0, title = 'precise caption')
+  draw_seperate(folder = "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/{}-nocap".format(stamp),   demo_num_list = [0,1,2,3,4,5], caption_id = -1, title = 'no caption')
+  draw_seperate(folder = "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/{}-vague".format(stamp),   demo_num_list = [0,1,2,3,4,5], caption_id = 0, title = 'vague caption')
+  draw_seperate(folder = "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/{}-precise".format(stamp), demo_num_list = [0,1,2,3,4,5], caption_id = 0, title = 'precise caption')
 
 
 def main(argv):

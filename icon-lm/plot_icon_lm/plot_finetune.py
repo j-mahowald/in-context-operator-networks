@@ -292,7 +292,7 @@ if __name__ == '__main__':
   FLAGS = flags.FLAGS
 
   flags.DEFINE_list('mode', ['error','sol'], 'mode')
-  flags.DEFINE_string('analysis_folder', '/workspace/Jamie/in-context-operator-networks/icon-lm/analysis', 'the folder where analysis results are stored')
+  flags.DEFINE_string('analysis_folder', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis', 'the folder where analysis results are stored')
   flags.DEFINE_string('icon_stamp', 'icon_lm_learn_20231005-094726-pde3-inverse', 'the stamp of the analysis result')
   flags.DEFINE_string('tune_deepo_stamp', 'icon_lm_deepo_20240121-203825-pde3-inverse', 'the stamp for saving fine-tuning results')
   flags.DEFINE_string('tune_fno_stamp', 'icon_lm_fno_20240121-203841-pde3-inverse', 'the stamp for saving fine-tuning results')

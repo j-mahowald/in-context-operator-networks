@@ -62,7 +62,7 @@ def make_plot_forward(real_name, compare_list, ymax):
   model_config = utils.load_json("../config_model/model_lm_config.json")
   model_config['caption_len'] = 0
 
-  restore_dir = '/workspace/Jamie/in-context-operator-networks/icon-lm/save/user/ckpts/icon_weno/{}'.format(FLAGS.ckpt)
+  restore_dir = '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/user/ckpts/icon_weno/{}'.format(FLAGS.ckpt)
   restore_step = 1000000
   folder = f"weno_{real_name}_init_scale_{FLAGS.init_scale}_{FLAGS.groups}x{FLAGS.num}"
   if not os.path.exists(folder):
@@ -145,7 +145,7 @@ def make_plot_backward(real_name, compare_list, ymax):
   model_config = utils.load_json("../config_model/model_lm_config.json")
   model_config['caption_len'] = 0
 
-  restore_dir = '/workspace/Jamie/in-context-operator-networks/icon-lm/save/user/ckpts/icon_weno/{}'.format(FLAGS.ckpt)
+  restore_dir = '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/user/ckpts/icon_weno/{}'.format(FLAGS.ckpt)
   restore_step = 1000000
 
   folder = f"weno_{real_name}_init_scale_{FLAGS.init_scale}_{FLAGS.groups}x{FLAGS.num}"

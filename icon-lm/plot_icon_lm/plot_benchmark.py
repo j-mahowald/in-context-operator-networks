@@ -93,12 +93,12 @@ def plot_benchmark():
                 }
 
   folder_dict = {
-                'ICON-LM (ours)': ["/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s1-20231005-094726", 
-                                  "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s2-20231008-110255",
-                                  "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s3-20231009-173624"],
-                'Encoder-Decoder ICON': ["/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/v1baseline_s1-20231004-103259",
-                                         "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/v1baseline_s2-20231006-114142",
-                                         "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/v1baseline_s3-20231007-175037"]
+                'ICON-LM (ours)': ["/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s1-20231005-094726", 
+                                  "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s2-20231008-110255",
+                                  "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s3-20231009-173624"],
+                'Encoder-Decoder ICON': ["/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/v1baseline_s1-20231004-103259",
+                                         "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/v1baseline_s2-20231006-114142",
+                                         "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/v1baseline_s3-20231007-175037"]
                 }
 
   draw_join(demo_num_list, style_dict, folder_dict, figsize=(3.5,2.5))

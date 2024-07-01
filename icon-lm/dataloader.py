@@ -649,7 +649,7 @@ if __name__ == "__main__":
     np.set_printoptions(threshold=np.inf, precision=3, suppress=True)
 
     config = utils.load_json('config_data/train_lm_config.json')
-    file_names = '/workspace/Jamie/in-context-operator-networks/icon-lm/data/data0910c/train*'
+    file_names = '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data/train*'
     config['load_list'] = []
     test(file_names, config)
 

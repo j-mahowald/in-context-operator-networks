@@ -99,9 +99,9 @@ def draw_decay(a_range, b_range, c_range, demo_num_list):
 
     plt.figure(figsize=(5, 4))
 
-    folders = ["/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_weno_20231213-111526",
-               "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_weno_20231209-222440",
-               "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_weno_20231217-122838"]
+    folders = ["/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_weno_20231213-111526",
+               "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_weno_20231209-222440",
+               "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_weno_20231217-122838"]
     labels = ["consistency loss, bs = 4 + 4", "$L_2$ loss, bs = 8 + 8", "$L_2$ loss, bs = 4 + 4"]
     forward_markers = ['bo--','ks--','r^--']
     backward_markers = forward_markers

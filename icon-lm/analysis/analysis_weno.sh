@@ -1,7 +1,7 @@
 stamp='20231209-222440'
-analysis_dir='/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_weno_'$stamp'_light'
-restore_dir='/workspace/Jamie/in-context-operator-networks/icon-lm/save/user/ckpts/icon_weno/'$stamp
-test_data_dirs='/workspace/Jamie/in-context-operator-networks/icon-lm/data/data0904_weno_cubic_test_light' # use the light version for quick analysis
+analysis_dir='/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_weno_'$stamp'_light'
+restore_dir='/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/user/ckpts/icon_weno/'$stamp
+test_data_dirs='/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data/data0904_weno_cubic_test_light' # use the light version for quick analysis
 
 
 CUDA_VISIBLE_DEVICES=0 python3 analysis.py --model 'icon_lm' --backend jax --task weno_cubic --write quest,demo \

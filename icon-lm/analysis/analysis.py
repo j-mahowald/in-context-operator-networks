@@ -339,7 +339,7 @@ if __name__ == '__main__':
 
   flags.DEFINE_integer('seed', 42, 'random seed')
 
-  flags.DEFINE_list('test_data_dirs', '/workspace/Jamie/in-context-operator-networks/icon-lm/data/data0910c', 'directories of testing data')
+  flags.DEFINE_list('test_data_dirs', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data', 'directories of testing data')
   flags.DEFINE_list('test_data_globs', ['test*'], 'filename glob patterns of testing data')
   flags.DEFINE_string('test_config_filename', 'test_input_id_config.json', 'config file for testing')
   flags.DEFINE_list('test_demo_num_list', [1,2,3,4,5], 'demo number list for testing')
@@ -351,9 +351,9 @@ if __name__ == '__main__':
 
   flags.DEFINE_string('model', 'gpt2', 'model name')
   flags.DEFINE_string('model_config_filename', '../config_model/model_gpt2_config.json', 'config file for model')
-  flags.DEFINE_string('analysis_dir', '/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_gpt2_20230921-003808', 'write file to dir')
+  flags.DEFINE_string('analysis_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_gpt2_20230921-003808', 'write file to dir')
   flags.DEFINE_string('results_name', '', 'additional file name for results')
-  flags.DEFINE_string('restore_dir', '/workspace/Jamie/in-context-operator-networks/icon-lm/save/user/ckpts/icon_gpt2/20230921-003808', 'restore directory')
+  flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/user/ckpts/icon_gpt2/20230921-003808', 'restore directory')
   flags.DEFINE_integer('restore_step', 1000000, 'restore step')
 
 

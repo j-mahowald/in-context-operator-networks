@@ -3,8 +3,8 @@
 
 
 stamp='20231005-094726'
-analysis_dir='/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_'$stamp'-pde3-inverse'
-restore_dir='/workspace/Jamie/in-context-operator-networks/icon-lm/save/user/ckpts/icon_lm_learn/'$stamp
+analysis_dir='/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_'$stamp'-pde3-inverse'
+restore_dir='/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/user/ckpts/icon_lm_learn/'$stamp
 
 
 CUDA_VISIBLE_DEVICES=0 python3 analysis.py --backend jax --model icon_lm --task ind --write quest,demo,equation \

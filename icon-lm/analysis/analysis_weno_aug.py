@@ -72,10 +72,10 @@ def write_sin_consistency_error(folder, eqn_name):
 
 if __name__ == "__main__":
 
-    # folder = "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_weno_20230829-170831_light"
+    # folder = "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_weno_20230829-170831_light"
     # eqn_name = 'conservation_weno_quadratic_backward'
     # write_consistency_error(folder, eqn_name)
 
-    folder = "/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_weno_20230904-184910_sin"
+    folder = "/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_weno_20230904-184910_sin"
     eqn_name = 'conservation_weno_sin_backward'
     write_sin_consistency_error(folder, eqn_name)

@@ -321,7 +321,7 @@ if __name__ == '__main__':
   flags.DEFINE_float('evmin', -0.04, 'error vmin')
   flags.DEFINE_float('evmax', 0.04, 'error vmax')
 
-  flags.DEFINE_list('test_data_dirs', '/workspace/Jamie/in-context-operator-networks/icon-lm/data/data0910c', 'directories of testing data')
+  flags.DEFINE_list('test_data_dirs', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data', 'directories of testing data')
   flags.DEFINE_list('test_data_globs', ['train_mfc_gparam_hj_forward22*'], 'filename glob patterns of testing data')
   flags.DEFINE_string('test_config_filename', 'test_lm_plot_mfc_config.json', 'config file for testing')
   flags.DEFINE_list('test_demo_num_list', [1,2,3,4,5], 'demo number list for testing')
@@ -333,9 +333,9 @@ if __name__ == '__main__':
 
   flags.DEFINE_string('model', 'icon_lm', 'model name')
   flags.DEFINE_string('model_config_filename', '../config_model/model_lm_config.json', 'config file for model')
-  flags.DEFINE_string('analysis_dir', '/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s1-20231005-094726', 'write file to dir')
+  flags.DEFINE_string('analysis_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s1-20231005-094726', 'write file to dir')
   flags.DEFINE_string('results_name', '', 'additional file name for results')
-  flags.DEFINE_string('restore_dir', '/workspace/Jamie/in-context-operator-networks/icon-lm/save/user/ckpts/icon_lm_learn/20231005-094726', 'restore directory')
+  flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/user/ckpts/icon_lm_learn/20231005-094726', 'restore directory')
   flags.DEFINE_integer('restore_step', 1000000, 'restore step')
 
 

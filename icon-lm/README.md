@@ -17,7 +17,7 @@ which will create an environment named `icon`. You may need to update the `prefi
 
 The captions are already stored in the `data_preparation/captions_1009` folder. The code for function data generation is located in the `data_preparation/` folder. Navigate to the `data_generation/` folder and run `bash datagen.sh`, which will generate the function data for the experiments. 
 
-The generated data will be stored in the `data_preparation/data` folder. We moved data to `/home/shared/icon/data/data0910c` for our experiments.
+The generated data will be stored in the `data_preparation/data` folder. We moved data to `/home/shared/icon/data` for our experiments.
 
 ## Training
 

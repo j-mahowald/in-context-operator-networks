@@ -69,10 +69,10 @@ def plot_train_vs_test():
                 'unpretrained GPT-2, testing captions': {'line': '-', 'color': 'blue', 'marker': 's'},
                 }
   folder_dict = {
-                  'pretrained GPT-2, training captions': ["/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_gpt2_full_s1-{}-testdata-traincap-{}".format(pretrained_stamp, cap)],
-                  'pretrained GPT-2, testing captions': ["/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_gpt2_full_s1-{}-testdata-testcap-{}".format(pretrained_stamp, cap)],
-                  'unpretrained GPT-2, training captions': ["/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_gpt2_unpretrained-s1-{}-testdata-traincap-{}".format(unpretrained_stamp, cap)],
-                  'unpretrained GPT-2, testing captions': ["/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/icon_gpt2_unpretrained-s1-{}-testdata-testcap-{}".format(unpretrained_stamp, cap)],
+                  'pretrained GPT-2, training captions': ["/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_gpt2_full_s1-{}-testdata-traincap-{}".format(pretrained_stamp, cap)],
+                  'pretrained GPT-2, testing captions': ["/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_gpt2_full_s1-{}-testdata-testcap-{}".format(pretrained_stamp, cap)],
+                  'unpretrained GPT-2, training captions': ["/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_gpt2_unpretrained-s1-{}-testdata-traincap-{}".format(unpretrained_stamp, cap)],
+                  'unpretrained GPT-2, testing captions': ["/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_gpt2_unpretrained-s1-{}-testdata-testcap-{}".format(unpretrained_stamp, cap)],
                   }
   all_error = get_join(demo_num_list, folder_dict)
   

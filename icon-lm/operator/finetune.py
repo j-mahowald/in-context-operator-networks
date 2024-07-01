@@ -165,10 +165,10 @@ if __name__ == '__main__':
 
   flags.DEFINE_list('mode', ['notune', 'tune'], 'mode')
   flags.DEFINE_integer('seed', 1, 'seed')
-  flags.DEFINE_string('analysis_folder', '/workspace/Jamie/in-context-operator-networks/icon-lm/analysis', 'the folder where analysis results are stored')
+  flags.DEFINE_string('analysis_folder', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis', 'the folder where analysis results are stored')
   flags.DEFINE_string('icon_stamp', 'icon_lm_learn_20231005-094726-pde3-inverse', 'the stamp of the data for fine-tuning')
   flags.DEFINE_string('tune_stamp', 'icon_lm_deepo_20240120-015041-pde3-inverse', 'the stamp for saving fine-tuning results')
-  flags.DEFINE_string('restore_dir', '/workspace/Jamie/in-context-operator-networks/icon-lm/save/user/ckpts/deepo_pretrain/20240120-015041', 
+  flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/user/ckpts/deepo_pretrain/20240120-015041', 
                       'the folder where ckpt results are stored')
   flags.DEFINE_string('model_name', 'deepo', 'model name')
   flags.DEFINE_string('model_config', 'model_deepo_pde_config.json', 'model config')

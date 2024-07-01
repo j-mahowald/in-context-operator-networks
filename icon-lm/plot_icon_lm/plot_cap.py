@@ -93,9 +93,9 @@ def plot_hero_join_cap_vs_nocap():
                 'precise caption': {'line': '-', 'color': 'black', 'marker': 's'},
                 }
   folder_dict = {
-                  'no caption': ["/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/{}-testdata-testcap-{}".format(stamp, 'nocap')],
-                  'value caption': ["/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/{}-testdata-testcap-{}".format(stamp, 'vague')],
-                  'precise caption': ["/workspace/Jamie/in-context-operator-networks/icon-lm/analysis/{}-testdata-testcap-{}".format(stamp, 'precise')],
+                  'no caption': ["/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/{}-testdata-testcap-{}".format(stamp, 'nocap')],
+                  'value caption': ["/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/{}-testdata-testcap-{}".format(stamp, 'vague')],
+                  'precise caption': ["/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/{}-testdata-testcap-{}".format(stamp, 'precise')],
                 }
   draw_join(demo_num_list, style_dict, folder_dict, 
             title = None, plot = plt.semilogy, figsize=(3.5,2.5), ylim=(0.008,1))

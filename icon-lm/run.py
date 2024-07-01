@@ -198,10 +198,10 @@ def run_train():
     runner.restore(FLAGS.restore_dir, FLAGS.restore_step, restore_opt_state=False)
     
   if FLAGS.tfboard:
-    results_dir = f'/workspace/Jamie/in-context-operator-networks/icon-lm/save/{FLAGS.user}/results/{FLAGS.problem}/'+ stamp
+    results_dir = f'/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/{FLAGS.user}/results/{FLAGS.problem}/'+ stamp
     file_writer = tf.summary.create_file_writer(results_dir)
     file_writer.set_as_default()
-    ckpt_dir = f'/workspace/Jamie/in-context-operator-networks/icon-lm/save/{FLAGS.user}/ckpts/{FLAGS.problem}/'+ stamp
+    ckpt_dir = f'/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/{FLAGS.user}/ckpts/{FLAGS.problem}/'+ stamp
     if not os.path.exists(ckpt_dir):
       os.makedirs(ckpt_dir)
 

@@ -117,6 +117,7 @@ def select_demo_quest(equation, caption, input_id, embedding_raw, embedding_pool
 
   if config['select_demo_quest'] == "random":
     num = tf.shape(cond_v)[0]
+    tf.print(f"Random demo indices: {demo_idx}")
     demo_idx = tf_rng.uniform(shape = (demo_num,), minval = 0, maxval = num, dtype = tf.int32)
     demo_cond_k = tf.gather(cond_k, demo_idx)
     demo_cond_v = tf.gather(cond_v, demo_idx)
@@ -124,21 +125,28 @@ def select_demo_quest(equation, caption, input_id, embedding_raw, embedding_pool
     demo_qoi_v = tf.gather(qoi_v, demo_idx)
 
     quest_idx = tf_rng.uniform(shape = (1,), minval = 0, maxval = num, dtype = tf.int32)
+    tf.print(f"Random quest index: {quest_idx}")
     quest_cond_k = tf.gather(cond_k, quest_idx)
     quest_cond_v = tf.gather(cond_v, quest_idx)
     quest_qoi_k = tf.gather(qoi_k, quest_idx)
     quest_qoi_v = tf.gather(qoi_v, quest_idx)
 
   elif config['select_demo_quest'] == "ordered":
+    if demo_num > num:
+      raise ValueError("demo_num exceeds the available number of items in cond_v")
     demo_cond_k = cond_k[:demo_num,...]
     demo_cond_v = cond_v[:demo_num,...]
     demo_qoi_k = qoi_k[:demo_num,...]
     demo_qoi_v = qoi_v[:demo_num,...]
 
+    if demo_num + 1 > num:
+      raise ValueError("demo_num + 1 exceeds the available number of items in cond_v")
     quest_cond_k = cond_k[demo_num:demo_num+1,...]
     quest_cond_v = cond_v[demo_num:demo_num+1,...]
     quest_qoi_k = qoi_k[demo_num:demo_num+1,...]
     quest_qoi_v = qoi_v[demo_num:demo_num+1,...]
+
+    tf.print(f"Ordered quest index: {demo_num}")
 
   else:
     raise ValueError(f"select must be random or ordered, but got {config['select_demo_quest']}")
@@ -425,6 +433,9 @@ def get_tf_dataset(seed, config, file_names,
     options.experimental_deterministic = deterministic
     dataset = dataset.with_options(options)
 
+    for example in dataset.take(5):
+      print("Example shapes in dataset:", [tf.shape(t) for t in example])
+
     return dataset
 
 class DataProvider():
@@ -549,7 +560,7 @@ class DataProvider():
     demo_qoi_k, demo_qoi_v, demo_qoi_mask, \
     quest_cond_k, quest_cond_v, quest_cond_mask, \
     quest_qoi_k, quest_qoi_v, quest_qoi_mask = next(self.dataset)
-    
+
     input_id = input_id.numpy()
     embedding_raw = embedding_raw.numpy()
     embedding_pool = embedding_pool.numpy()

@@ -207,4 +207,4 @@ dependencies:
       - webencodings==0.5.1
       - websocket-client==1.7.0
       - widgetsnbextension==4.0.10
-prefix: /workspace/Jamie/anaconda3/envs/icon
+prefix: /work2/09989/jmahowald/frontera/anaconda3/envs/icon

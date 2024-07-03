@@ -340,7 +340,7 @@ if __name__ == '__main__':
   flags.DEFINE_string('problem', 'test', 'folder for storing the model checkpoints and tensorboard logs')
   flags.DEFINE_enum('backend', 'jax', ['jax','torch'], 'backend of runner')
 
-  flags.DEFINE_integer('seed', 42, 'random seed')
+  flags.DEFINE_integer('seed', 43, 'random seed')
 
   flags.DEFINE_boolean('train', True, 'train the neural network')
   flags.DEFINE_integer('profile_level', 0, '0: usual training, 1: profile training, 2: profile without loading data')

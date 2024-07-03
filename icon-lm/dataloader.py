@@ -117,8 +117,8 @@ def select_demo_quest(equation, caption, input_id, embedding_raw, embedding_pool
 
   if config['select_demo_quest'] == "random":
     num = tf.shape(cond_v)[0]
-    tf.print(f"Random demo indices: {demo_idx}")
     demo_idx = tf_rng.uniform(shape = (demo_num,), minval = 0, maxval = num, dtype = tf.int32)
+    tf.print(f"Random demo indices: {demo_idx}")
     demo_cond_k = tf.gather(cond_k, demo_idx)
     demo_cond_v = tf.gather(cond_v, demo_idx)
     demo_qoi_k = tf.gather(qoi_k, demo_idx)

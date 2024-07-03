@@ -33,7 +33,19 @@ def select_kv(key, val, len_select, select_method):
     else: # len_select < len_full
       if select_method == 'random':
         seed = tf_rng_seq.make_seeds(1)[:,0]
-        index = tf.random.experimental.stateless_shuffle(tf.range(len_full), seed = seed)[0:len_select]
+
+        # Set your seed for reproducibility
+        seed_value = 12345
+        tf.random.set_seed(seed_value)
+
+        # Create the range and shuffle it
+        full_range = tf.range(len_full)
+        shuffled_range = tf.random.shuffle(full_range)
+
+        # Select the first len_select elements from the shuffled range
+        index = shuffled_range[:len_select]
+
+        print(index)
       elif select_method == 'even':
         delta = (len_full - 1) // (len_select - 1)
         index = tf.range(0, len_select) * delta

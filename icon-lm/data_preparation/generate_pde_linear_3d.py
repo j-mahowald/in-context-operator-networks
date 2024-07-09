@@ -18,7 +18,7 @@ import data_mfc_hj as mfc_hj
 import data_writetfrecord as datawrite
 import data_utils as dutils
 
-import tensorflow as tf
+# import tensorflow as tf
 
 def print_dot(i):
   if i % 100 == 0:
@@ -94,10 +94,9 @@ def main(argv):
 
 if __name__ == "__main__":
 
-  import tensorflow as tf
   import os
   os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-  tf.config.set_visible_devices([], device_type='GPU')
+  # tf.config.set_visible_devices([], device_type='GPU')
 
   FLAGS = flags.FLAGS
   flags.DEFINE_integer('num', 6, 'number of systems in each equation')

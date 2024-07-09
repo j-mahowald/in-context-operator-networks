@@ -1,8 +1,9 @@
 import torch
-import tensorflow as tf
+# import tensorflow as tf
+from torch.utils import tensorboard as tb
 import os
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-tf.config.set_visible_devices([], device_type='GPU')
+# tf.config.set_visible_devices([], device_type='GPU')
 from pprint import pprint
 import jax.tree_util as tree
 import numpy as np
@@ -13,7 +14,8 @@ from absl import app, flags, logging
 import plot
 from einshape import numpy_einshape as einshape
 
-gpus = tf.config.list_physical_devices(device_type = 'GPU')
+# gpus = tf.config.list_physical_devices(device_type = 'GPU')
+gpus = torch.cuda.device_count()
 print(gpus, flush=True)
 
 ## Comments with two hashtags (##) are ones Jamie made, comments with one hashtag (#) are original comments
@@ -199,7 +201,7 @@ def run_train():
     
   if FLAGS.tfboard:
     results_dir = f'/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/{FLAGS.user}/results/{FLAGS.problem}/'+ stamp
-    file_writer = tf.summary.create_file_writer(results_dir)
+    file_writer = tb.summary.create_file_writer(results_dir)
     file_writer.set_as_default()
     ckpt_dir = f'/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/{FLAGS.user}/ckpts/{FLAGS.problem}/'+ stamp
     if not os.path.exists(ckpt_dir):
@@ -234,7 +236,7 @@ def run_train():
         this_loss_mean, this_loss_std = np.mean(this_loss), np.std(this_loss)
         print("{} loss: {:.4f}+-{:.4f}".format(dataset.name, this_loss_mean, this_loss_std), flush=True)
         if FLAGS.tfboard:
-          tf.summary.scalar(f'loss/{dataset.name}', this_loss_mean, step = runner.train_step)
+          tb.summary.scalar(f'loss/{dataset.name}', this_loss_mean, step = runner.train_step)
           
       ## Calculates error for test data 
       equation, caption, data, label = test_data.get_next_data(caption_max_len = model_config['caption_len'])
@@ -246,7 +248,7 @@ def run_train():
           print("test with demo num {}, no caption  , error: {:.4f}+-{:.4f}".format(
                   demo_num, this_error_mean, this_error_std), flush=True)
           if FLAGS.tfboard:
-            tf.summary.scalar(f'test error, demo num: {demo_num}/no caption', this_error_mean, step = runner.train_step)
+            tb.summary.scalar(f'test error, demo num: {demo_num}/no caption', this_error_mean, step = runner.train_step)
         # with caption
         else:
           this_error = runner.get_error(data, label, with_caption = True) # WARNING: it's actually the error for quest, not the loss
@@ -254,7 +256,7 @@ def run_train():
           print("test with demo num {}, caption id {}, error: {:.4f}+-{:.4f}".format(
                   demo_num, caption_id, this_error_mean, this_error_std), flush=True)
           if FLAGS.tfboard:
-            tf.summary.scalar(f'test error, demo num: {demo_num}/caption id: {caption_id}', this_error_mean, step = runner.train_step)
+            tb.summary.scalar(f'test error, demo num: {demo_num}/caption id: {caption_id}', this_error_mean, step = runner.train_step)
       
       utils.timer.toc("calculate, print and write loss to tfboard")
       print("==================== step: {}, loss end ====================".format(runner.train_step))
@@ -295,7 +297,7 @@ def run_train():
             this_data_ij = tree.tree_map(lambda x: x[fij], this_data)
             figure = plot.plot_data(this_equation_ij, this_caption_ij,
                                     this_data_ij, this_label[fij], this_pred[fij], train_config)
-            tf.summary.image("{} case {}".format(dataset.name, fij), figure, step = runner.train_step)
+            tb.summary.image("{} case {}".format(dataset.name, fij), figure, step = runner.train_step)
       utils.timer.toc("plot to tfboard")
 
     if FLAGS.profile_level <= 1:
@@ -322,7 +324,7 @@ def main(argv):
   for key, value in FLAGS.__flags.items():
       print(value.name, ": ", value._value, flush=True)
 
-  tf.random.set_seed(FLAGS.seed + 123456) 
+  utils.set_seed(FLAGS.seed + 123456) 
   if FLAGS.main == 'train':
     run_train()
   elif FLAGS.main == 'test':

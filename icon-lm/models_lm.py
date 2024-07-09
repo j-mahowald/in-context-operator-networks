@@ -226,7 +226,7 @@ def test():
   import jax.tree_util as tree
   np.set_printoptions(threshold=np.inf, precision=3, suppress=True)
   import haiku as hk
-  rng = hk.PRNGSequence(42)
+  rng = hk.PRNGSequence(43)
 
   run_config = utils.load_json('config_data/train_lm_input_id_config.json')
   run_config["demo_cond_len"] = 50

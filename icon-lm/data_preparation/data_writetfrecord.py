@@ -1,9 +1,11 @@
 import tensorflow as tf
 import numpy as np
+import jax
 import jax.numpy as jnp
+import haiku as hk
 from einshape import jax_einshape as einshape
 from pprint import pprint
-tf.config.set_visible_devices([], device_type='GPU')
+# tf.config.set_visible_devices([], device_type='GPU')
 import sys
 sys.path.append('..')
 import utils
@@ -272,6 +274,52 @@ def write_mfc_rhoparam_hj_tfrecord(name, eqn_type, all_params, all_eqn_captions,
           writer.write(s_element)
         else:
           raise Exception("NaN found!")
+        
+
+def write_evolution_tfrecord(seed, eqn_type, all_params, all_eqn_captions, all_xs, all_us, stride, problem_type, file_name):
+  '''
+  xs: (N,)
+  us: (num, steps + 1, N, 1)
+  '''
+  rng = hk.PRNGSequence(jax.random.PRNGKey(seed))
+  print("===========" + file_name + "==========", flush=True)
+  count = 0
+  with tf.io.TFRecordWriter(file_name) as writer:
+    for params, eqn_captions, xs, us in zip(all_params, all_eqn_captions, all_xs, all_us):
+      equation_name = "{}_{}_{}_{}".format(eqn_type, problem_type, params, stride)
+      caption = eqn_captions
+      u1 = einshape("ijkl->(ij)kl", us[:,:-stride,:,:]) # (num * step, N, 1)
+      u2 = einshape("ijkl->(ij)kl", us[:,stride:,:,:]) # (num * step, N, 1)
+      # shuffle the first dimension of u1 and u2, keep the same permutation
+      key = next(rng)
+      u1 = jax.random.permutation(key, u1, axis = 0) # (num * step, N, 1)
+      u2 = jax.random.permutation(key, u2, axis = 0) # (num * step, N, 1)
+      # reshape u1 and u2 to (num, s, N, 1)
+      u1 = einshape("(ij)kl->ijkl", u1, i = us.shape[0]) # (num, step, N, 1)
+      u2 = einshape("(ij)kl->ijkl", u2, i = us.shape[0]) # (num, step, N, 1)
+      
+      if FLAGS.truncate is not None:
+        u1 = u1[:,:FLAGS.truncate,:,:] # (num, truncate, N, 1)
+        u2 = u2[:,:FLAGS.truncate,:,:] # (num, truncate, N, 1)
+
+      x1 = einshape("k->jkl", xs, j = u1.shape[1], l = 1) # (truncate or step, N, 1)
+      x2 = einshape("k->jkl", xs, j = u2.shape[1], l = 1) # (struncate or step, N, 1)
+
+      if problem_type == 'forward':
+        for i in range(us.shape[0]): # split into num parts
+          count += 1
+          s_element = serialize_element(equation = equation_name, caption = caption, 
+                                                  cond_k = x1, cond_v = u1[i], qoi_k = x2, qoi_v = u2[i], count = count)
+          writer.write(s_element)
+      elif problem_type == 'backward':
+        for i in range(us.shape[0]):
+          count += 1
+          s_element = serialize_element(equation = equation_name, caption = caption, 
+                                                  cond_k = x2, cond_v = u2[i], qoi_k = x1, qoi_v = u1[i], count = count)
+          writer.write(s_element)
+      else:
+        raise NotImplementedError("problem_type = {} is not implemented".format(problem_type))
+
 
 def write_pde_3d(name, eqn_type, all_params, all_eqn_captions, all_xs, all_ts, all_gs, all_us, problem_type):
     if problem_type not in ["forward", "inverse"]:

@@ -158,7 +158,7 @@ class CrossAttnTransformer(nn.Module):
   
 def test():
   # Initialize random PRNGKey
-  key = jax.random.PRNGKey(42)
+  key = jax.random.PRNGKey(43)
   rngs = {'params': jax.random.PRNGKey(20), 'dropout': jax.random.PRNGKey(10)}
 
   # Define input shape and model parameters

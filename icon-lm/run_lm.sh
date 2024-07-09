@@ -1,5 +1,5 @@
 # ICON-LM (Single-Modal):
-python3 run.py --problem 'icon_lm' --epochs 100 \
+CUDA_VISIBLE_DEVICES=0 python3 run.py --problem 'icon_lm' --epochs 100 \
   --train_batch_size 24 --train_data_dirs '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data' \
   --model_config_filename 'model_lm_config.json' \
   --train_config_filename 'train_lm_config.json' \

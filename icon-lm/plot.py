@@ -3,7 +3,7 @@ import jax.numpy as jnp
 import numpy as np
 import matplotlib.pyplot as plt
 import utils
-import tensorflow as tf
+# import tensorflow as tf
 import os
 
 def plot_pred(equation, prompt, mask, query, ground_truth, pred, to_tfboard = True):

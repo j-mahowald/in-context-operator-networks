@@ -1,8 +1,8 @@
 import torch
-import tensorflow as tf
+# import tensorflow as tf
 import os
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-tf.config.set_visible_devices([], device_type='GPU')
+# tf.config.set_visible_devices([], device_type='GPU')
 from pprint import pprint
 
 import jax.numpy as jnp
@@ -295,7 +295,7 @@ def main(argv):
   for key, value in FLAGS.__flags.items():
     print(value.name, ": ", value._value, flush=True)
 
-  tf.random.set_seed(FLAGS.seed + 123456) 
+  utils.set_seed(FLAGS.seed + 123456) 
   result_dict = run_analysis()
 
   print("")
@@ -337,7 +337,7 @@ if __name__ == '__main__':
   flags.DEFINE_enum('task', 'ind', ['ind', 'ood', 'len', 'weno_quadratic', 'weno_cubic'], 'task type')
   flags.DEFINE_enum('backend', 'torch', ['jax','torch'], 'backend of runner')
 
-  flags.DEFINE_integer('seed', 42, 'random seed')
+  flags.DEFINE_integer('seed', 43, 'random seed')
 
   flags.DEFINE_list('test_data_dirs', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data', 'directories of testing data')
   flags.DEFINE_list('test_data_globs', ['test*'], 'filename glob patterns of testing data')

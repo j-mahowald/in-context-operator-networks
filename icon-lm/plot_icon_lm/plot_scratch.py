@@ -7,10 +7,10 @@ import matplotlib.patches as patches
 # from jax.config import config
 import jax
 config = jax.config
-import tensorflow as tf
+# import tensorflow as tf
 import os
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-tf.config.set_visible_devices([], device_type='GPU')
+# tf.config.set_visible_devices([], device_type='GPU')
 from collections import OrderedDict
 from pprint import pprint
 import jax.tree_util as tree

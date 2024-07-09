@@ -1,11 +1,13 @@
 import numpy as np
 import os
 import tensorflow as tf
-tf.config.set_visible_devices([], device_type='GPU')
+import torch
+import torch.nn.functional as F
+# tf.config.set_visible_devices([], device_type='GPU')
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
 
 from functools import partial
-import tensorflow as tf
+import re 
 import numpy as np
 import data_sequence
 from pprint import pprint
@@ -46,11 +48,13 @@ Data = namedtuple('Data', ['input_id', 'embedding_raw', 'embedding_pool', 'embed
 
 try:
   FLAGS = flags.FLAGS
-  tf_rng = tf.random.Generator.from_seed(FLAGS.seed + 15)
-  print("tf_rng from FLAGS, seed = {}".format(FLAGS.seed + 15), flush = True)
+  seed = FLAGS.seed + 15
+  torch_rng = torch.Generator().manual_seed(seed)
+  print("torch_rng from FLAGS, seed = {}".format(FLAGS.seed + 15), flush = True)
 except:
-  tf_rng = tf.random.Generator.from_seed(15)
-  print("tf_rng from default, seed = {}".format(15), flush = True)
+  seed = 15
+  torch_rng = torch.Generator().manual_seed(seed)
+  print("torch_rng from default, seed = {}".format(15), flush = True)
 
 # define a parser function to parse the serialized example
 def parse_function(example_proto, config):
@@ -91,23 +95,23 @@ def parse_function(example_proto, config):
     qoi_k = tf.io.parse_tensor(parsed_example['qoi_k'], out_type=tf.float32)
     qoi_v = tf.io.parse_tensor(parsed_example['qoi_v'], out_type=tf.float32)
 
-    caption_n = tf.shape(caption)[0]
+    caption_n = torch.shape(caption)[0]
     if "embedding" in config['load_list'] or "input_id" in config['load_list']:
       embedding_mask = tf.io.parse_tensor(parsed_example['embedding_mask'], out_type=tf.int64)
     else:
-      embedding_mask = tf.zeros((caption_n, 0))
+      embedding_mask = torch.zeros((caption_n, 0))
     
     if "embedding" in config['load_list']:
       embedding_raw = tf.io.parse_tensor(parsed_example['embedding_raw'], out_type=tf.float32)    
       embedding_pool = tf.io.parse_tensor(parsed_example['embedding_pool'], out_type=tf.float32)
     else:
-      embedding_raw = tf.zeros((caption_n, 0, 0)) # dummy, shape (n, len, embedding_dim)
-      embedding_pool = tf.zeros((caption_n, 0)) # dummy, shape (n, embedding_dim)
+      embedding_raw = torch.zeros((caption_n, 0, 0)) # dummy, shape (n, len, embedding_dim)
+      embedding_pool = torch.zeros((caption_n, 0)) # dummy, shape (n, embedding_dim)
 
     if "input_id" in config['load_list']:
       input_id = tf.io.parse_tensor(parsed_example['input_id'], out_type=tf.int64)
     else:
-      input_id = tf.zeros((caption_n, 0))
+      input_id = torch.zeros((caption_n, 0))
 
     return equation, caption, input_id, embedding_raw, embedding_pool, embedding_mask, cond_k, cond_v, qoi_k, qoi_v
 
@@ -116,37 +120,31 @@ def select_demo_quest(equation, caption, input_id, embedding_raw, embedding_pool
   demo_num = config['demo_num']
 
   if config['select_demo_quest'] == "random":
-    num = tf.shape(cond_v)[0]
-    demo_idx = tf_rng.uniform(shape = (demo_num,), minval = 0, maxval = num, dtype = tf.int32)
-    tf.print(f"Random demo indices: {demo_idx}")
-    demo_cond_k = tf.gather(cond_k, demo_idx)
-    demo_cond_v = tf.gather(cond_v, demo_idx)
-    demo_qoi_k = tf.gather(qoi_k, demo_idx)
-    demo_qoi_v = tf.gather(qoi_v, demo_idx)
+    num = torch.Tensor.shape(cond_v)[0]
+    demo_idx = torch.randint(0, num, (demo_num,), generator=torch_rng, dtype=torch.int32)
+    demo_cond_k = cond_k[demo_idx]
+    demo_cond_v = cond_v[demo_idx]
+    demo_qoi_k = qoi_k[demo_idx]
+    demo_qoi_v = qoi_v[demo_idx]
 
-    quest_idx = tf_rng.uniform(shape = (1,), minval = 0, maxval = num, dtype = tf.int32)
-    tf.print(f"Random quest index: {quest_idx}")
-    quest_cond_k = tf.gather(cond_k, quest_idx)
-    quest_cond_v = tf.gather(cond_v, quest_idx)
-    quest_qoi_k = tf.gather(qoi_k, quest_idx)
-    quest_qoi_v = tf.gather(qoi_v, quest_idx)
+    quest_idx = torch.randint(0, num, (1,), generator=torch_rng, dtype=torch.int32)
+    quest_cond_k = cond_k[quest_idx]
+    quest_cond_v = cond_v[quest_idx]
+    quest_qoi_k = qoi_k[quest_idx]
+    quest_qoi_v = qoi_v[quest_idx]
 
   elif config['select_demo_quest'] == "ordered":
-    if demo_num > num:
-      raise ValueError("demo_num exceeds the available number of items in cond_v")
     demo_cond_k = cond_k[:demo_num,...]
     demo_cond_v = cond_v[:demo_num,...]
     demo_qoi_k = qoi_k[:demo_num,...]
     demo_qoi_v = qoi_v[:demo_num,...]
 
-    if demo_num + 1 > num:
-      raise ValueError("demo_num + 1 exceeds the available number of items in cond_v")
     quest_cond_k = cond_k[demo_num:demo_num+1,...]
     quest_cond_v = cond_v[demo_num:demo_num+1,...]
     quest_qoi_k = qoi_k[demo_num:demo_num+1,...]
     quest_qoi_v = qoi_v[demo_num:demo_num+1,...]
 
-    tf.print(f"Ordered quest index: {demo_num}")
+    print(f"Ordered quest index: {demo_num}")
 
   else:
     raise ValueError(f"select must be random or ordered, but got {config['select_demo_quest']}")
@@ -159,7 +157,7 @@ def select_demo_quest(equation, caption, input_id, embedding_raw, embedding_pool
 def select_caption(equation, caption, input_id, embedding_raw, embedding_pool, embedding_mask, cond_k, cond_v, qoi_k, qoi_v, config):
   mode = config['select_caption']
   if mode == 'random':
-    caption_idx = tf_rng.uniform(shape = (), minval = 0, maxval = tf.shape(caption)[0], dtype = tf.int32)
+    caption_idx = torch.randint(0, torch.shape(caption)[0], (), generator=torch_rng, dtype=torch.int32)
     caption = caption[caption_idx]
     input_id = input_id[caption_idx]
     embedding_raw = embedding_raw[caption_idx]
@@ -169,13 +167,13 @@ def select_caption(equation, caption, input_id, embedding_raw, embedding_pool, e
     pass # do nothing, include all captions
   elif mode == 'random_dual':
     # randomly select one caption from first half, and one from second half
-    caption_idx_1 = tf_rng.uniform(shape = (), minval = 0, maxval = tf.shape(caption)[0]//2, dtype = tf.int32)
-    caption_idx_2 = tf_rng.uniform(shape = (), minval = tf.shape(caption)[0]//2, maxval = tf.shape(caption)[0], dtype = tf.int32)
-    caption = tf.strings.join([caption[caption_idx_1], caption[caption_idx_2]], separator="||")
-    input_id = tf.concat([input_id[caption_idx_1], input_id[caption_idx_2]], axis = -1)
-    embedding_raw = tf.zeros((1,)) # dummy
-    embedding_pool = tf.zeros((1,)) # dummy
-    embedding_mask = tf.concat([embedding_mask[caption_idx_1], embedding_mask[caption_idx_2]], axis = -1)
+    caption_idx_1 = torch.randint(0, torch.shape(caption)[0]//2, (), generator=torch_rng, dtype=torch.int32)
+    caption_idx_2 = torch.randint(0, torch.shape(caption)[0]//2, (), generator=torch_rng, dtype=torch.int32)
+    caption = "||".join([caption[caption_idx_1], caption[caption_idx_2]])
+    input_id = torch.cat([input_id[caption_idx_1], input_id[caption_idx_2]], dim = -1)
+    embedding_raw = torch.zeros((1,)) # dummy
+    embedding_pool = torch.zeros((1,)) # dummy
+    embedding_mask = torch.cat([embedding_mask[caption_idx_1], embedding_mask[caption_idx_2]], dim = -1)
   elif isinstance(mode, int):
     caption = caption[mode]
     input_id = input_id[mode]
@@ -205,43 +203,47 @@ def build_feature(equation, caption, input_id, embedding_raw, embedding_pool, em
     pass
   elif config['k_mode'] == 'itx':
     # index, time, space
-    if tf.strings.regex_full_match(equation, "ode.*forward.*"):
-      demo_cond_k = tf.stack([demo_cond_k[...,1],demo_cond_k[...,0]], axis = -1)  # index first, then time
-      demo_qoi_k = tf.pad(demo_qoi_k, [[0,0],[0,0],[1,0]]) # add zero index
-      quest_cond_k = tf.stack([quest_cond_k[...,1],quest_cond_k[...,0]], axis = -1) # index first, then time
-      quest_qoi_k = tf.pad(quest_qoi_k, [[0,0],[0,0],[1,0]]) # add zero index
-    elif tf.strings.regex_full_match(equation, "ode.*inverse.*") \
-      or tf.strings.regex_full_match(equation, "series.*") \
-      or tf.strings.regex_full_match(equation, "mfc_gparam.*"):
-      # add zero index
-      demo_cond_k = tf.pad(demo_cond_k, [[0,0],[0,0],[1,0]])
-      demo_qoi_k = tf.pad(demo_qoi_k, [[0,0],[0,0],[1,0]])
-      quest_cond_k = tf.pad(quest_cond_k, [[0,0],[0,0],[1,0]]) 
-      quest_qoi_k = tf.pad(quest_qoi_k, [[0,0],[0,0],[1,0]])
-    elif tf.strings.regex_full_match(equation, "pde.*") \
-      or tf.strings.regex_full_match(equation, ".*weno.*"):
-      # add zero index and time
-      demo_cond_k = tf.pad(demo_cond_k, [[0,0],[0,0],[2,0]])
-      demo_qoi_k = tf.pad(demo_qoi_k, [[0,0],[0,0],[2,0]])
-      quest_cond_k = tf.pad(quest_cond_k, [[0,0],[0,0],[2,0]])
-      quest_qoi_k = tf.pad(quest_qoi_k, [[0,0],[0,0],[2,0]])
-    elif tf.strings.regex_full_match(equation, "mfc_rhoparam.*"):
-      demo_cond_k = tf.pad(demo_cond_k, [[0,0],[0,0],[2,0]])
-      demo_qoi_k = tf.pad(demo_qoi_k, [[0,0],[0,0],[1,0]])
-      quest_cond_k = tf.pad(quest_cond_k, [[0,0],[0,0],[2,0]])
-      quest_qoi_k = tf.pad(quest_qoi_k, [[0,0],[0,0],[1,0]])
+
+    if re.fullmatch(r"ode.*forward.*", equation):
+        demo_cond_k = torch.stack([demo_cond_k[...,1], demo_cond_k[...,0]], dim=-1)  # index first, then time
+        demo_qoi_k = F.pad(demo_qoi_k, (0, 0, 0, 0, 1, 0))  # add zero index
+        quest_cond_k = torch.stack([quest_cond_k[...,1], quest_cond_k[...,0]], dim=-1)  # index first, then time
+        quest_qoi_k = F.pad(quest_qoi_k, (0, 0, 0, 0, 1, 0))  # add zero index
+    elif re.fullmatch(r"ode.*inverse.*", equation) \
+        or re.fullmatch(r"series.*", equation) \
+        or re.fullmatch(r"mfc_gparam.*", equation):
+        # add zero index
+        demo_cond_k = F.pad(demo_cond_k, (0, 0, 0, 0, 1, 0))
+        demo_qoi_k = F.pad(demo_qoi_k, (0, 0, 0, 0, 1, 0))
+        quest_cond_k = F.pad(quest_cond_k, (0, 0, 0, 0, 1, 0))
+        quest_qoi_k = F.pad(quest_qoi_k, (0, 0, 0, 0, 1, 0))
+    elif re.fullmatch(r"pde.*", equation) \
+        or re.fullmatch(r".*weno.*", equation):
+        # add zero index and time
+        demo_cond_k = F.pad(demo_cond_k, (0, 0, 0, 0, 2, 0))
+        demo_qoi_k = F.pad(demo_qoi_k, (0, 0, 0, 0, 2, 0))
+        quest_cond_k = F.pad(quest_cond_k, (0, 0, 0, 0, 2, 0))
+        quest_qoi_k = F.pad(quest_qoi_k, (0, 0, 0, 0, 2, 0))
+    elif re.fullmatch(r"mfc_rhoparam.*", equation):
+        demo_cond_k = F.pad(demo_cond_k, (0, 0, 0, 0, 2, 0))
+        demo_qoi_k = F.pad(demo_qoi_k, (0, 0, 0, 0, 1, 0))
+        quest_cond_k = F.pad(quest_cond_k, (0, 0, 0, 0, 2, 0))
+        quest_qoi_k = F.pad(quest_qoi_k, (0, 0, 0, 0, 1, 0))
+
     else:
       pass
   else:
     pass
-  demo_cond_k = tf.pad(demo_cond_k, [[0,0],[0,0],[0, config['k_dim'] - tf.shape(demo_cond_k)[-1]]])
-  demo_cond_v = tf.pad(demo_cond_v, [[0,0],[0,0],[0, config['v_dim'] - tf.shape(demo_cond_v)[-1]]])
-  demo_qoi_k = tf.pad(demo_qoi_k, [[0,0],[0,0],[0, config['k_dim'] - tf.shape(demo_qoi_k)[-1]]])
-  demo_qoi_v = tf.pad(demo_qoi_v, [[0,0],[0,0],[0, config['v_dim'] - tf.shape(demo_qoi_v)[-1]]])
-  quest_cond_k = tf.pad(quest_cond_k, [[0,0],[0,0],[0, config['k_dim'] - tf.shape(quest_cond_k)[-1]]])
-  quest_cond_v = tf.pad(quest_cond_v, [[0,0],[0,0],[0, config['v_dim'] - tf.shape(quest_cond_v)[-1]]])
-  quest_qoi_k = tf.pad(quest_qoi_k, [[0,0],[0,0],[0, config['k_dim'] - tf.shape(quest_qoi_k)[-1]]])
-  quest_qoi_v = tf.pad(quest_qoi_v, [[0,0],[0,0],[0, config['v_dim'] - tf.shape(quest_qoi_v)[-1]]])
+
+  demo_cond_k = F.pad(demo_cond_k, (0, config['k_dim'] - demo_cond_k.shape[-1], 0, 0, 0, 0))
+  demo_cond_v = F.pad(demo_cond_v, (0, config['v_dim'] - demo_cond_v.shape[-1], 0, 0, 0, 0))
+  demo_qoi_k = F.pad(demo_qoi_k, (0, config['k_dim'] - demo_qoi_k.shape[-1], 0, 0, 0, 0))
+  demo_qoi_v = F.pad(demo_qoi_v, (0, config['v_dim'] - demo_qoi_v.shape[-1], 0, 0, 0, 0))
+  quest_cond_k = F.pad(quest_cond_k, (0, config['k_dim'] - quest_cond_k.shape[-1], 0, 0, 0, 0))
+  quest_cond_v = F.pad(quest_cond_v, (0, config['v_dim'] - quest_cond_v.shape[-1], 0, 0, 0, 0))
+  quest_qoi_k = F.pad(quest_qoi_k, (0, config['k_dim'] - quest_qoi_k.shape[-1], 0, 0, 0, 0))
+  quest_qoi_v = F.pad(quest_qoi_v, (0, config['v_dim'] - quest_qoi_v.shape[-1], 0, 0, 0, 0))
+  
   if config['return_raw']:
     return raw, equation, caption, input_id, embedding_raw, embedding_pool, embedding_mask, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v, quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v
   else:
@@ -264,52 +266,52 @@ def build_sequence(raw, equation, caption, input_id, embedding_raw, embedding_po
     quest_qoi_v: list of [qoi_len, v_dim]
     quest_qoi_mask: list of [qoi_len]
   '''
-  if tf.strings.regex_full_match(equation, "pde.*spatial_forward.*"): 
+  if re.fullmatch(r"pde.*spatial_forward.*", equation):
     build_fn = data_sequence.build_pde_spatial_forward
     this_config = config['pde_spatial_forward']
     out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
                   quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v, 
                   config, this_config)
-  elif tf.strings.regex_full_match(equation, "pde.*spatial_inverse.*"): 
+  elif re.fullmatch(r"pde.*spatial_inverse.*", equation): 
     build_fn = data_sequence.build_pde_spatial_inverse
     this_config = config['pde_spatial_inverse']
     out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
                   quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v, 
                   config, this_config)
-  elif tf.strings.regex_full_match(equation, "ode.*forward.*"):
+  elif re.fullmatch(r"ode.*forward.*", equation):
     build_fn = data_sequence.build_ode_forward
     this_config = config['ode_forward']   
     out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
                   quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v, 
                   config, this_config)
-  elif tf.strings.regex_full_match(equation, "ode.*inverse.*"): 
+  elif re.fullmatch(r"ode.*inverse.*", equation): 
     # ode inverse, drop the last qoi (control)
     build_fn = data_sequence.build_ode_inverse
     this_config = config['ode_inverse']  
     out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
                   quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v, 
                   config, this_config)
-  elif tf.strings.regex_full_match(equation, "series.*"):
+  elif re.fullmatch(r"series.*", equation):
     build_fn = data_sequence.build_time_series
     this_config = config['time_series'] 
     out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
                   quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v, 
                   config, this_config)
-  elif tf.strings.regex_full_match(equation, "mfc_gparam.*forward.*"):
+  elif re.fullmatch(r"mfc_gparam.*forward.*", equation):
     build_fn = data_sequence.build_mfc_gparam_forward
     this_config = config['mfc_gparam_forward']
     out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
                   quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
                   config, this_config)
-  elif tf.strings.regex_full_match(equation, "mfc_rhoparam.*forward.*"):
+  elif re.fullmatch(r"mfc_rhoparam.*forward.*", equation):
     build_fn = data_sequence.build_mfc_rhoparam_forward
     this_config = config['mfc_rhoparam_forward']
     out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
                   quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
                   config, this_config)
   else: # other problems
-    if not tf.strings.regex_full_match(equation, ".*weno.*"):
-      tf.print("WARNING: see other problems!")
+    if not re.fullmatch(r".*weno.*", equation):
+      print("WARNING: see other problems!")
     build_fn = data_sequence.build_others
     this_config = config['others']
     out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
@@ -364,21 +366,21 @@ def build_model_input(raw, equation, caption, input_id, embedding_raw, embedding
     quest_qoi_mask: array [quest_num, qoi_len]
   @return:
   '''
-  demo_cond_mask = tf.convert_to_tensor(demo_cond_mask) # [demo_num, demo_cond_len]
-  demo_cond_k = tf.convert_to_tensor(demo_cond_k) * tf.cast(demo_cond_mask, tf.float32)[...,None] # [demo_num, demo_cond_len, k_dim]
-  demo_cond_v = tf.convert_to_tensor(demo_cond_v) * tf.cast(demo_cond_mask, tf.float32)[...,None] # [demo_num, demo_cond_len, v_dim]
+  demo_cond_mask = torch.as_tensor(demo_cond_mask)# [demo_num, demo_cond_len]
+  demo_cond_k = torch.as_tensor(demo_cond_k) * demo_cond_mask.type(torch.float32).unsqueeze(-1) # [demo_num, demo_cond_len, k_dim]
+  demo_cond_v = torch.as_tensor(demo_cond_v) * demo_cond_mask.type(torch.float32).unsqueeze(-1) # [demo_num, demo_cond_len, v_dim]
 
-  demo_qoi_mask = tf.convert_to_tensor(demo_qoi_mask) # [demo_num, demo_qoi_len]
-  demo_qoi_k = tf.convert_to_tensor(demo_qoi_k) * tf.cast(demo_qoi_mask, tf.float32)[...,None] # [demo_num, demo_qoi_len, k_dim]
-  demo_qoi_v = tf.convert_to_tensor(demo_qoi_v) * tf.cast(demo_qoi_mask, tf.float32)[...,None] # [demo_num, demo_qoi_len, v_dim]
+  demo_qoi_mask = torch.as_tensor(demo_qoi_mask)# [demo_num, demo_cond_len]
+  demo_qoi_k = torch.as_tensor(demo_qoi_k) * demo_qoi_mask.type(torch.float32).unsqueeze(-1) # [demo_num, demo_qoi_len, k_dim]
+  demo_qoi_v = torch.as_tensor(demo_qoi_v) * demo_qoi_mask.type(torch.float32).unsqueeze(-1) # [demo_num, demo_qoi_len, v_dim]
 
-  quest_cond_mask = tf.convert_to_tensor(quest_cond_mask) # [quest_num, quest_cond_len]
-  quest_cond_k = tf.convert_to_tensor(quest_cond_k) * tf.cast(quest_cond_mask, tf.float32)[...,None] # [quest_num, quest_cond_len, k_dim]
-  quest_cond_v = tf.convert_to_tensor(quest_cond_v) * tf.cast(quest_cond_mask, tf.float32)[...,None] # [quest_num, quest_cond_len, v_dim]
+  quest_cond_mask = torch.as_tensor(quest_cond_mask)# [demo_num, demo_cond_len]
+  quest_cond_k = torch.as_tensor(quest_cond_k) * quest_cond_mask.type(torch.float32).unsqueeze(-1) # [demo_num, demo_cond_len, k_dim]
+  quest_cond_v = torch.as_tensor(quest_cond_v) * quest_cond_mask.type(torch.float32).unsqueeze(-1) # [demo_num, demo_cond_len, v_dim]
 
-  quest_qoi_mask = tf.convert_to_tensor(quest_qoi_mask) # [quest_num, quest_qoi_len]
-  quest_qoi_k = tf.convert_to_tensor(quest_qoi_k) * tf.cast(quest_qoi_mask, tf.float32)[...,None] # [quest_num, quest_qoi_len, k_dim]
-  quest_qoi_v = tf.convert_to_tensor(quest_qoi_v) * tf.cast(quest_qoi_mask, tf.float32)[...,None] # [quest_num, quest_qoi_len, v_dim]
+  quest_qoi_mask = torch.as_tensor(quest_qoi_mask)# [demo_num, demo_cond_len]
+  quest_qoi_k = torch.as_tensor(quest_qoi_k) * quest_qoi_mask.type(torch.float32).unsqueeze(-1) # [demo_num, demo_cond_len, k_dim]
+  quest_qoi_v = torch.as_tensor(quest_qoi_v) * quest_qoi_mask.type(torch.float32).unsqueeze(-1) # [demo_num, demo_cond_len, v_dim]
   
   return raw, equation, caption, input_id, embedding_raw, embedding_pool, embedding_mask, \
         demo_cond_k, demo_cond_v, demo_cond_mask, \
@@ -434,7 +436,7 @@ def get_tf_dataset(seed, config, file_names,
     dataset = dataset.with_options(options)
 
     for example in dataset.take(5):
-      print("Example shapes in dataset:", [tf.shape(t) for t in example])
+      print("Example shapes in dataset:", [torch.shape(t) for t in example])
 
     return dataset
 
@@ -655,12 +657,11 @@ def test(file_names, config):
 
 
 if __name__ == "__main__":
-    
 
     np.set_printoptions(threshold=np.inf, precision=3, suppress=True)
 
     config = utils.load_json('config_data/train_lm_config.json')
-    file_names = '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data/train*'
+    file_names = '/workspace/Jamie/in-context-operator-networks/icon-lm/data/train*'
     config['load_list'] = []
     test(file_names, config)
 

@@ -10,10 +10,10 @@ sys.path.append('../')
 # from jax.config import config
 import jax
 config = jax.config
-import tensorflow as tf
+# import tensorflow as tf
 import os
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-tf.config.set_visible_devices([], device_type='GPU')
+# tf.config.set_visible_devices([], device_type='GPU')
 import utils
 from pprint import pprint
 from dataloader import Data

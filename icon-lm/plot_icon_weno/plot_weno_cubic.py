@@ -7,10 +7,10 @@ import matplotlib.gridspec as gridspec
 import jax
 # from jax.config import config
 config = jax.config
-import tensorflow as tf
+# import tensorflow as tf
 import os
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-tf.config.set_visible_devices([], device_type='GPU')
+# tf.config.set_visible_devices([], device_type='GPU')
 from collections import OrderedDict
 
 def calculate_error(pred, label, mask, order = 1):

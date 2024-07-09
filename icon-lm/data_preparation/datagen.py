@@ -398,10 +398,10 @@ def main(argv):
     
 if __name__ == "__main__":
 
-  import tensorflow as tf
+  # import tensorflow as tf
   import os
   os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-  tf.config.set_visible_devices([], device_type='GPU')
+  # tf.config.set_visible_devices([], device_type='GPU')
 
   FLAGS = flags.FLAGS
   flags.DEFINE_string('caption_mode', None, 'mode for caption')

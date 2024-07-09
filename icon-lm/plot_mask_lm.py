@@ -94,7 +94,7 @@ def test():
   import jax.tree_util as tree
   np.set_printoptions(threshold=np.inf, precision=3, suppress=True)
   import haiku as hk
-  rng = hk.PRNGSequence(42)
+  rng = hk.PRNGSequence(43)
 
   demo_num = 2
   quest_num = 1

@@ -1,7 +1,8 @@
 import numpy as np
 
-import tensorflow as tf
-tf.config.set_visible_devices([], device_type='GPU')
+# import tensorflow as tf
+import torch
+# tf.config.set_visible_devices([], device_type='GPU')
 import os
 from utils import load_json
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
@@ -51,10 +52,10 @@ def parse_function(example_proto, config):
 
 def select_caption(equation, cond_k, cond_v, qoi_k, qoi_v, config):
     # make dummy captions
-    caption = tf.zeros((), dtype = tf.string)
-    embedding_raw = tf.zeros((), dtype = tf.float32)
-    embedding_pool = tf.zeros((), dtype = tf.float32)
-    embedding_mask = tf.zeros((), dtype = tf.bool)
-    input_id = tf.zeros((), dtype = tf.int32)
+    caption = ""
+    embedding_raw = torch.zeros((), dtype = torch.float32)
+    embedding_pool = torch.zeros((), dtype = torch.float32)
+    embedding_mask = torch.zeros((), dtype = torch.bool)
+    input_id = torch.zeros((), dtype = torch.int32)
 
     return equation, caption, input_id, embedding_raw, embedding_pool, embedding_mask, cond_k, cond_v, qoi_k, qoi_v

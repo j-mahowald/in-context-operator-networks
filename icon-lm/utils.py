@@ -6,6 +6,8 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import io
+from torchvision.transforms import functional as F
+from PIL import Image
 import tensorflow as tf
 import jax.tree_util as tree
 import os
@@ -347,22 +349,21 @@ def get_train_iter_pmap(loss_batch_ave_fn, optimizer):
     return params, opt_state
   return train_iter
 
-
+## Changed this function to not rely on TF
 def plot_to_image(figure):
-  """Converts the matplotlib plot specified by 'figure' to a PNG image and
-  returns it. The supplied figure is closed and inaccessible after this call."""
-  # Save the plot to a PNG in memory.
-  buf = io.BytesIO()
-  plt.savefig(buf, format='png')
-  # Closing the figure prevents it from being displayed directly inside
-  # the notebook.
-  plt.close(figure)
-  buf.seek(0)
-  # Convert PNG buffer to TF image
-  image = tf.image.decode_png(buf.getvalue(), channels=4)
-  # Add the batch dimension
-  image = tf.expand_dims(image, 0)
-  return image
+    """Converts the matplotlib plot specified by 'figure' to a PNG image and
+    returns it as a PyTorch tensor. The supplied figure is closed and inaccessible after this call."""
+
+    buf = io.BytesIO()
+    figure.savefig(buf, format='png')
+
+    plt.close(figure)
+    buf.seek(0)
+
+    image = Image.open(buf).convert('RGB')
+    image = F.to_tensor(image)
+    image = image.unsqueeze(0)
+    return image
 
 class DataIndex():
   '''
@@ -425,7 +426,7 @@ class DataSet():
 
 
 if __name__ == "__main__":
-  key = jax.random.PRNGKey(42)
+  key = jax.random.PRNGKey(43)
   x = jax.random.uniform(key, (100,40))
   y = jnp.sum(x, axis = 1)
   

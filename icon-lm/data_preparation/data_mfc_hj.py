@@ -6,6 +6,7 @@ import os
 config.update('jax_enable_x64', True)
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
 import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 from functools import partial
@@ -16,8 +17,8 @@ from collections import namedtuple
 import matplotlib.pyplot as plt
 import haiku as hk
 import gc
-# from utils import utils.timer
 import utils
+from utils import timer
 import data_utils
 
 

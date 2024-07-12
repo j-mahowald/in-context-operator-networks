@@ -4,8 +4,9 @@ import jax
 from einshape import jax_einshape as einshape
 import pickle
 from functools import partial
-import sys
-sys.path.append('../')
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import utils
 from absl import app, flags, logging
 import haiku as hk

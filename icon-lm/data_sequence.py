@@ -51,7 +51,7 @@ def select_kv(key, val, len_select, select_method):
     '''
 
     rng_key = jax.random.PRNGKey(12345)
-    len_full = torch.Tensor.shape(key)[0]
+    len_full = key.shape[0]
     if len_select > len_full:
         key = F.pad(key, (0, 0, 0, len_select - len_full))
         val = F.pad(val, (0, 0, 0, len_select - len_full))

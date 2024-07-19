@@ -121,13 +121,13 @@ def select_demo_quest(equation, caption, input_id, embedding_raw, embedding_pool
 
   if config['select_demo_quest'] == "random":
     num = cond_v.shape[0]
-    demo_idx = torch.randint(0, num, (demo_num,), generator=torch_rng, dtype=torch.int32)
+    demo_idx = torch.randint(low=0, high=num, size=(demo_num,), generator=torch_rng, dtype=torch.int32)
     demo_cond_k = cond_k[demo_idx]
     demo_cond_v = cond_v[demo_idx]
     demo_qoi_k = qoi_k[demo_idx]
     demo_qoi_v = qoi_v[demo_idx]
 
-    quest_idx = torch.randint(0, num, (1,), generator=torch_rng, dtype=torch.int32)
+    quest_idx = torch.randint(low=0, high=num, size=(1,), generator=torch_rng, dtype=torch.int32)
     quest_cond_k = cond_k[quest_idx]
     quest_cond_v = cond_v[quest_idx]
     quest_qoi_k = qoi_k[quest_idx]
@@ -157,7 +157,7 @@ def select_demo_quest(equation, caption, input_id, embedding_raw, embedding_pool
 def select_caption(equation, caption, input_id, embedding_raw, embedding_pool, embedding_mask, cond_k, cond_v, qoi_k, qoi_v, config):
   mode = config['select_caption']
   if mode == 'random':
-    caption_idx = torch.randint(0, caption.shape[0], (), generator=torch_rng, dtype=torch.int32)
+    caption_idx = torch.randint(low=0, hihg=caption.shape[0], size=(), generator=torch_rng, dtype=torch.int32)
     caption = caption[caption_idx]
     input_id = input_id[caption_idx]
     embedding_raw = embedding_raw[caption_idx]
@@ -167,8 +167,8 @@ def select_caption(equation, caption, input_id, embedding_raw, embedding_pool, e
     pass # do nothing, include all captions
   elif mode == 'random_dual':
     # randomly select one caption from first half, and one from second half
-    caption_idx_1 = torch.randint(0, caption.shape[0]//2, (), generator=torch_rng, dtype=torch.int32)
-    caption_idx_2 = torch.randint(0, caption.shape[0]//2, (), generator=torch_rng, dtype=torch.int32)
+    caption_idx_1 = torch.randint(low=0, high=caption.shape[0]//2, size=(), generator=torch_rng, dtype=torch.int32)
+    caption_idx_2 = torch.randint(low=0, high=caption.shape[0]//2, size=(), generator=torch_rng, dtype=torch.int32)
     caption = "||".join([caption[caption_idx_1], caption[caption_idx_2]])
     input_id = torch.cat([input_id[caption_idx_1], input_id[caption_idx_2]], dim = -1)
     embedding_raw = torch.zeros((1,)) # dummy

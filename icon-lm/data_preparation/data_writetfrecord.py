@@ -319,7 +319,7 @@ def write_evolution_tfrecord(seed, eqn_type, all_params, all_eqn_captions, all_x
           writer.write(s_element)
       else:
         raise NotImplementedError("problem_type = {} is not implemented".format(problem_type))
-
+      
 
 def write_pde_3d(name, eqn_type, all_params, all_eqn_captions, all_xs, all_ts, all_gs, all_us, problem_type):
     if problem_type not in ["forward", "inverse"]:
@@ -335,31 +335,39 @@ def write_pde_3d(name, eqn_type, all_params, all_eqn_captions, all_xs, all_ts, a
             caption = eqn_captions
 
             # Prepare coordinate arrays
-            num_samples, N_x, N_t, _ = xs.shape
-            x_coords = xs[0, :, 0, 0]  # (N_x,)
-            t_coords = ts[0, 0, :, 0]  # (N_t,)
+            num, N_x_plus_1, N_t_plus_1, _ = xs.shape
+            x_coords = xs[0, :, 0, 0]  # (N_x+1,)
+            t_coords = ts[0, 0, :, 0]  # (N_t+1,)
 
             # Combine x and t coordinates
-            xt_grid = np.array(np.meshgrid(x_coords, t_coords, indexing='ij')).transpose(1, 2, 0)  # (N_x, N_t, 2)
-            xt_coords = np.tile(xt_grid, (num_samples, 1, 1, 1))  # (num, N_x, N_t, 2)
-            xt_coords = xt_coords.reshape(num_samples, N_x * N_t, 2)  # (num, N_x * N_t, 2)
+            xt_grid = jnp.stack(jnp.meshgrid(x_coords, t_coords, indexing='ij'), axis=-1)  # (N_x+1, N_t+1, 2)
+            xt_coords = jnp.tile(xt_grid[None, ...], (num, 1, 1, 1))  # (num, N_x+1, N_t+1, 2)
+            xt_coords = xt_coords.reshape(num, -1, 2)  # (num, (N_x+1) * (N_t+1), 2)
+
+            cond_k_c = jnp.pad(xt_coords[:, :-(N_x_plus_1), :], ((0, 0), (0, 0), (0, 1)), constant_values=0)
+            base_array = jnp.column_stack((x_coords, jnp.zeros_like(x_coords)))
+            cond_k_i_base = jnp.pad(base_array, ((0, 0), (0, 1)), constant_values=1)
+            cond_k_i = jnp.tile(cond_k_i_base[None, ...], (num, 1, 1))
+            cond_k = jnp.concatenate([cond_k_c, cond_k_i], axis=1)
+
+            flattened_uxt = us.reshape(num, -1, 1)
+            flattened_g = gs.reshape(num, -1, 1)
+            cond_v_c = flattened_g[:, :-(N_x_plus_1), :]
+            cond_v_i = flattened_g[:, :N_x_plus_1, :]
+            cond_v = jnp.concatenate([cond_v_c, cond_v_i], axis=1)
 
             count += 1
-            g_values = gs.squeeze(axis=-1).reshape(num_samples, N_x * N_t, 1)  # (num, N_x * N_t, 1)
-            u_values = us.squeeze(axis=-1).reshape(num_samples, N_x * N_t, 1)  # (num, N_x * N_t, 1)
 
             if problem_type == "forward":
-                cond_v, qoi_v = g_values, u_values
-            else:  # inverse
-                cond_v, qoi_v = u_values, g_values
+                s_element = serialize_element(equation=equation_name, caption=caption,
+                                              cond_k=cond_k, cond_v=cond_v, qoi_k=xt_coords, qoi_v=flattened_uxt,
+                                              count=count)
+                writer.write(s_element)
 
-            s_element = serialize_element(
-                equation=equation_name,
-                caption=caption,
-                cond_k=xt_coords,
-                cond_v=cond_v,
-                qoi_k=xt_coords,
-                qoi_v=qoi_v,
-                count=count
-            )
-            writer.write(s_element)
+            elif problem_type == "inverse":
+                s_element = serialize_element(equation=equation_name, caption=caption,
+                                              cond_k=xt_coords, cond_v=flattened_uxt, qoi_k=cond_k, qoi_v=cond_v,
+                                              count=count)
+                writer.write(s_element)
+            else:
+                raise NotImplementedError("problem_type = {} is not implemented".format(problem_type))

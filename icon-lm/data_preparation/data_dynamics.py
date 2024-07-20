@@ -97,7 +97,7 @@ def generate_one_dyn(key, ode_batch_fn, dt, length, num, k_sigma, k_l, init_rang
   init = jax.random.uniform(subkey2, (num,), minval = init_range[0], maxval = init_range[1])
   # traj[0] = init, final is affected by control[-1]
   _, traj = ode_batch_fn(init, control, dt, *coeffs, euler_step)
-  ts_expand = einshape("i->ji", ts, j = num)
+  ts_expand = einshape("i->ji", ts, j = num) # (num, N_x)
   return ts_expand[...,None], control[...,None], traj[...,None]
 
 

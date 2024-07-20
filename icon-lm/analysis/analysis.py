@@ -1,8 +1,8 @@
 import torch
-# import tensorflow as tf
+import tensorflow as tf
 import os
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-# tf.config.set_visible_devices([], device_type='GPU')
+tf.config.set_visible_devices([], device_type='GPU')
 from pprint import pprint
 
 import jax.numpy as jnp
@@ -349,12 +349,12 @@ if __name__ == '__main__':
   flags.DEFINE_list('loss_mode', ['nocap'], 'loss mode')
   flags.DEFINE_list('write', [], 'write mode')
 
-  flags.DEFINE_string('model', 'gpt2', 'model name')
+  flags.DEFINE_string('model', 'icon_lm', 'model name')
   flags.DEFINE_string('model_config_filename', '../config_model/model_gpt2_config.json', 'config file for model')
-  flags.DEFINE_string('analysis_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_gpt2_20230921-003808', 'write file to dir')
+  flags.DEFINE_string('analysis_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836', 'write file to dir')
   flags.DEFINE_string('results_name', '', 'additional file name for results')
-  flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/user/ckpts/icon_gpt2/20230921-003808', 'restore directory')
-  flags.DEFINE_integer('restore_step', 1000000, 'restore step')
+  flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836', 'restore directory')
+  flags.DEFINE_integer('restore_step', 900000, 'restore step')
 
 
   app.run(main)

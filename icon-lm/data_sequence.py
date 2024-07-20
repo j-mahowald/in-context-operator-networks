@@ -1,82 +1,46 @@
 import numpy as np
-# import tensorflow as tf
-import torch
-import jax
-import jax.numpy as jnp
-import torch.nn.functional as F
+import tensorflow as tf
 from absl import flags
 
-class CustomRNG:
-    def __init__(self, seed):
-        self.torch_gen = torch.Generator().manual_seed(seed)
-        self.jax_key = jax.random.PRNGKey(seed)
-
-    def uniform(self, shape=(), minval=0, maxval=None, dtype=None):
-        if dtype is None or dtype == torch.float32:
-            if maxval is None:
-                maxval = 1
-            return torch.empty(shape, dtype=torch.float32, generator=self.torch_gen).uniform_(minval, maxval)
-        elif dtype == torch.int32:
-            if maxval is None:
-                raise ValueError("maxval must be specified for integer dtype")
-            return torch.randint(low=minval, high=maxval, size=shape, generator=self.torch_gen, dtype=torch.int32)
-        else:
-            raise ValueError(f"Unsupported dtype: {dtype}")
-
-    def make_seeds(self, num):
-        return jax.random.split(self.jax_key, num)
-
 try:
-    FLAGS = flags.FLAGS
-    rng_seq = CustomRNG(FLAGS.seed + 1234)
-    print(f"rng_seq from FLAGS, seed = {FLAGS.seed + 1234}", flush=True)
+  FLAGS = flags.FLAGS
+  tf_rng_seq = tf.random.Generator.from_seed(FLAGS.seed + 1234)
+  print("tf_rng_seq from FLAGS, seed = {}".format(FLAGS.seed + 1234), flush = True)
 except:
-    rng_seq = CustomRNG(1234)
-    print(f"rng_seq from default, seed = {1234}", flush=True)
+  tf_rng_seq = tf.random.Generator.from_seed(1234)
+  print("tf_rng_seq from default, seed = {}".format(1234), flush = True)
 
-@jax.jit
+@tf.function
 def select_kv(key, val, len_select, select_method):
     '''
     select some k-v pairs from the full set of k-v pairs
     if len_select > len_full, then select all, and pad with 0.
     @ param:
+        seed: int
         key: 2D array, [len, kdim]  (len >= len_full)
         val: 2D array, [len, vdim]
+        len_full: int
         len_select: int
         select_method: 'random' or 'even' or 'first'
-        rng_key: JAX random key
     @ return:
         key_list: the updated list of 2D arrays [len_select, kdim]
         val_list: the updated list of 2D arrays [len_select, vdim]
     '''
-
-    rng_key = jax.random.PRNGKey(12345)
-    len_full = key.shape[0]
+    len_full = tf.shape(key)[0]
     if len_select > len_full:
-        key = F.pad(key, (0, 0, 0, len_select - len_full))
-        val = F.pad(val, (0, 0, 0, len_select - len_full))
+        key = tf.pad(key, [[0, len_select - len_full], [0, 0]])
+        val = tf.pad(val, [[0, len_select - len_full], [0, 0]])
     else: # len_select < len_full
-
       if select_method == 'random':
-        
-        # Create the range and shuffle it
-        full_range = jnp.arange(len_full)
-        shuffled_range = jax.randon.permutation(rng_key, full_range)
-
-        # Select the first len_select elements from the shuffled range
-        index = shuffled_range[:len_select]
-
+        seed = tf_rng_seq.make_seeds(1)[:,0]
+        index = tf.random.experimental.stateless_shuffle(tf.range(len_full), seed = seed)[0:len_select]
       elif select_method == 'even':
         delta = (len_full - 1) // (len_select - 1)
-        index = jnp.arange(0, len_select) * delta
-
+        index = tf.range(0, len_select) * delta
       elif select_method == 'first':
-        index = jnp.arange(0, len_select)
-
-      index = torch.from_numpy(jax.device_get(index))
-      key = torch.index_select(key, 0, index)
-      val = torch.index_select(val, 0, index)
-
+        index = tf.range(0, len_select)
+      key = tf.gather(key, index, axis = 0)
+      val = tf.gather(val, index, axis = 0)
     return key, val
 
 def build_function_kv(demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
@@ -120,8 +84,8 @@ def apply_random_demo_num_in_use(config, this_config, demo_cond_mask_list, demo_
   '''
   randomly select the number of demos to be used in the current prompt
   '''
-  demo_num_in_use = rng_seq.uniform(shape = (), minval = this_config['demo_num_begin'], maxval = this_config['demo_num_end'], dtype = torch.int32)
-  demo_in_use_mask = F.pad(torch.ones(demo_num_in_use, dtype=torch.int32), (0, config['demo_num'] - demo_num_in_use))
+  demo_num_in_use = tf_rng_seq.uniform(shape = (), minval = this_config['demo_num_begin'], maxval = this_config['demo_num_end'], dtype = tf.int32)
+  demo_in_use_mask = tf.pad(tf.ones((demo_num_in_use), dtype = tf.int32), [[0, config['demo_num'] - demo_num_in_use]])
   new_demo_cond_mask_list = []
   new_demo_qoi_mask_list = []
   for i in range(config['demo_num']):
@@ -147,35 +111,35 @@ def apply_cond_qoi_len_in_use(config, this_config,
     quest_qoi_mask_list = [1 for _ in range(config['quest_num'])]
 
   if demo_cond_len_in_use is None:
-    demo_cond_len_in_use = rng_seq.uniform(shape = (config['demo_num'],),
+    demo_cond_len_in_use = tf_rng_seq.uniform(shape = (config['demo_num'],),
                               minval = this_config['demo_cond_len_in_use_begin'],
-                              maxval = this_config['demo_cond_len_in_use_end'], dtype = torch.int32)
+                              maxval = this_config['demo_cond_len_in_use_end'], dtype = tf.int32)
   if demo_qoi_len_in_use is None:
-    demo_qoi_len_in_use = rng_seq.uniform(shape = (config['demo_num'],),
+    demo_qoi_len_in_use = tf_rng_seq.uniform(shape = (config['demo_num'],),
                               minval = this_config['demo_qoi_len_in_use_begin'],
-                              maxval = this_config['demo_qoi_len_in_use_end'], dtype = torch.int32)
+                              maxval = this_config['demo_qoi_len_in_use_end'], dtype = tf.int32)
   if quest_cond_len_in_use is None:
-    quest_cond_len_in_use = rng_seq.uniform(shape = (config['quest_num'],),
+    quest_cond_len_in_use = tf_rng_seq.uniform(shape = (config['quest_num'],),
                               minval = this_config['quest_cond_len_in_use_begin'],
-                              maxval = this_config['quest_cond_len_in_use_end'], dtype = torch.int32)
+                              maxval = this_config['quest_cond_len_in_use_end'], dtype = tf.int32)
   if quest_qoi_len_in_use is None:
-    quest_qoi_len_in_use = rng_seq.uniform(shape = (config['quest_num'],),
+    quest_qoi_len_in_use = tf_rng_seq.uniform(shape = (config['quest_num'],),
                               minval = this_config['quest_qoi_len_in_use_begin'],
-                              maxval = this_config['quest_qoi_len_in_use_end'], dtype = torch.int32)
+                              maxval = this_config['quest_qoi_len_in_use_end'], dtype = tf.int32)
 
   new_demo_cond_mask_list = []
   new_demo_qoi_mask_list = []
   for i in range(config['demo_num']):
-    demo_cond_mask_i = F.pad(torch.ones((demo_cond_len_in_use[i],), dtype=torch.int32), (0, config['demo_cond_len'] - demo_cond_len_in_use[i]), value=0)
-    demo_qoi_mask_i = F.pad(torch.ones((demo_qoi_len_in_use[i],), dtype=torch.int32), (0, config['demo_qoi_len'] - demo_qoi_len_in_use[i]), value=0)
+    demo_cond_mask_i = tf.pad(tf.ones((demo_cond_len_in_use[i],), dtype = tf.int32), [[0, config['demo_cond_len'] - demo_cond_len_in_use[i]]])
+    demo_qoi_mask_i = tf.pad(tf.ones((demo_qoi_len_in_use[i],), dtype = tf.int32), [[0, config['demo_qoi_len'] - demo_qoi_len_in_use[i]]])
     new_demo_cond_mask_list.append(demo_cond_mask_i * demo_cond_mask_list[i])
     new_demo_qoi_mask_list.append(demo_qoi_mask_i * demo_qoi_mask_list[i])
   
   new_quest_cond_mask_list = []
   new_quest_qoi_mask_list = []
   for i in range(config['quest_num']):
-    quest_cond_mask_i = F.pad(torch.ones((quest_cond_len_in_use[i],), dtype=torch.int32), (0, config['quest_cond_len'] - quest_qoi_len_in_use[i]), value=0)
-    quest_qoi_mask_i = F.pad(torch.ones((quest_qoi_len_in_use[i],), dtype = torch.int32), (0, config['quest_qoi_len'] - quest_qoi_len_in_use[i]), value=0)
+    quest_cond_mask_i = tf.pad(tf.ones((quest_cond_len_in_use[i],), dtype = tf.int32), [[0, config['quest_cond_len'] - quest_cond_len_in_use[i]]])
+    quest_qoi_mask_i = tf.pad(tf.ones((quest_qoi_len_in_use[i],), dtype = tf.int32), [[0, config['quest_qoi_len'] - quest_qoi_len_in_use[i]]])
     new_quest_cond_mask_list.append(quest_cond_mask_i * quest_cond_mask_list[i])
     new_quest_qoi_mask_list.append(quest_qoi_mask_i * quest_qoi_mask_list[i])
 
@@ -194,10 +158,10 @@ def build_ode_forward(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v
   case 2, qoi_len_in_use == qoi_len, cond_len_in_use = qoi_len-1: qoi_len-1 control token, 1 initial condition token
   '''
   # move the initial condition of u ahead, before control tokens
-  demo_cond_k = torch.cat([demo_cond_k[:, -1:, :], demo_cond_k[:, :-1, :]], dim = 1)
-  demo_cond_v = torch.cat([demo_cond_v[:, -1:, :], demo_cond_v[:, :-1, :]], dim = 1)
-  quest_cond_k = torch.cat([quest_cond_k[:, -1:, :], quest_cond_k[:, :-1, :]], dim = 1)
-  quest_cond_v = torch.cat([quest_cond_v[:, -1:, :], quest_cond_v[:, :-1, :]], dim = 1)
+  demo_cond_k = tf.concat([demo_cond_k[:, -1:, :], demo_cond_k[:, :-1, :]], axis = 1)
+  demo_cond_v = tf.concat([demo_cond_v[:, -1:, :], demo_cond_v[:, :-1, :]], axis = 1)
+  quest_cond_k = tf.concat([quest_cond_k[:, -1:, :], quest_cond_k[:, :-1, :]], axis = 1)
+  quest_cond_v = tf.concat([quest_cond_v[:, -1:, :], quest_cond_v[:, :-1, :]], axis = 1)
 
   demo_cond_k_list, demo_cond_v_list, demo_qoi_k_list, demo_qoi_v_list, \
   quest_cond_k_list, quest_cond_v_list, quest_qoi_k_list, quest_qoi_v_list = \
@@ -205,31 +169,31 @@ def build_ode_forward(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v
                     quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v, 
                     config, this_config)
 
-  demo_qoi_len_in_use = rng_seq.uniform(shape = (config['demo_num'],),
+  demo_qoi_len_in_use = tf_rng_seq.uniform(shape = (config['demo_num'],),
                                 minval = this_config['demo_qoi_len_in_use_begin'],
                                 maxval = this_config['demo_qoi_len_in_use_end'],
-                                dtype = torch.int32)
+                                dtype = tf.int32)
   demo_cond_len_in_use = demo_qoi_len_in_use # control tokens + initial condition token
   demo_cond_mask_list = []
   demo_qoi_mask_list = []
   for i in range(config['demo_num']):
     demo_cond_len_in_use_i = demo_cond_len_in_use[i]
     demo_qoi_len_in_use_i = demo_qoi_len_in_use[i]
-    demo_cond_mask_list.append(F.pad(torch.ones((demo_cond_len_in_use_i,), dtype=torch.int32), (0, config['demo_cond_len']-demo_cond_len_in_use_i)))
-    demo_qoi_mask_list.append(F.pad(torch.ones((demo_qoi_len_in_use_i,), dtype=torch.int32), (0, config['demo_qoi_len']-demo_qoi_len_in_use_i)))
+    demo_cond_mask_list.append(tf.pad(tf.ones((demo_cond_len_in_use_i,), dtype = tf.int32), [[0, config['demo_cond_len']-demo_cond_len_in_use_i]]))
+    demo_qoi_mask_list.append(tf.pad(tf.ones((demo_qoi_len_in_use_i,), dtype = tf.int32),[[0, config['demo_qoi_len']-demo_qoi_len_in_use_i]]))
 
-  quest_qoi_len_in_use = rng_seq.uniform(shape = (config['quest_num'],),
+  quest_qoi_len_in_use = tf_rng_seq.uniform(shape = (config['quest_num'],),
                                 minval = this_config['quest_qoi_len_in_use_begin'],
                                 maxval = this_config['quest_qoi_len_in_use_end'],
-                                dtype = torch.int32)
+                                dtype = tf.int32)
   quest_cond_len_in_use = quest_qoi_len_in_use
   quest_cond_mask_list = []
   quest_qoi_mask_list = []
   for i in range(config['quest_num']):
     quest_cond_len_in_use_i = quest_cond_len_in_use[i]
     quest_qoi_len_in_use_i = quest_qoi_len_in_use[i]
-    quest_cond_mask_list.append(F.pad(torch.ones((quest_cond_len_in_use_i,), dtype = torch.int32), (0, config['quest_cond_len']-quest_cond_len_in_use_i)))
-    quest_qoi_mask_list.append(F.pad(torch.ones((quest_qoi_len_in_use_i,), dtype = torch.int32), (0, config['quest_qoi_len']-quest_qoi_len_in_use_i)))
+    quest_cond_mask_list.append(tf.pad(tf.ones((quest_cond_len_in_use_i,), dtype = tf.int32), [[0, config['quest_cond_len']-quest_cond_len_in_use_i]]))
+    quest_qoi_mask_list.append(tf.pad(tf.ones((quest_qoi_len_in_use_i,), dtype = tf.int32), [[0, config['quest_qoi_len']-quest_qoi_len_in_use_i]]))
 
   demo_cond_mask_list, demo_qoi_mask_list = apply_random_demo_num_in_use(config, this_config, demo_cond_mask_list, demo_qoi_mask_list)
   return equation, demo_cond_k_list, demo_cond_v_list, demo_qoi_k_list, demo_qoi_v_list, \
@@ -252,32 +216,31 @@ def build_ode_inverse(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v
   build_function_kv(demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v, 
                     quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v, 
                     config, this_config)
-  demo_qoi_len_in_use = rng_seq.uniform(shape = (config['demo_num'],),
+  demo_qoi_len_in_use = tf_rng_seq.uniform(shape = (config['demo_num'],),
                                 minval = this_config['demo_qoi_len_in_use_begin'],
                                 maxval = this_config['demo_qoi_len_in_use_end'],
-                                dtype = torch.int32)
+                                dtype = tf.int32)
   demo_cond_len_in_use = demo_qoi_len_in_use + 1
   demo_cond_mask_list = []
   demo_qoi_mask_list = []
   for i in range(config['demo_num']):
     demo_cond_len_in_use_i = demo_cond_len_in_use[i]
     demo_qoi_len_in_use_i = demo_qoi_len_in_use[i]
-    demo_cond_mask_list.append(F.pad(torch.ones((demo_cond_len_in_use_i,), dtype = torch.int32), (0, config['demo_cond_len']-demo_cond_len_in_use_i)))
-    demo_qoi_mask_list.append(F.pad(torch.ones((demo_qoi_len_in_use_i,), dtype = torch.int32), (0, config['demo_qoi_len']-demo_qoi_len_in_use_i)))
+    demo_cond_mask_list.append(tf.pad(tf.ones((demo_cond_len_in_use_i,), dtype = tf.int32), [[0, config['demo_cond_len']-demo_cond_len_in_use_i]]))
+    demo_qoi_mask_list.append(tf.pad(tf.ones((demo_qoi_len_in_use_i,), dtype = tf.int32),[[0, config['demo_qoi_len']-demo_qoi_len_in_use_i]]))
 
-  quest_qoi_len_in_use = rng_seq.uniform(shape = (config['quest_num'],),
+  quest_qoi_len_in_use = tf_rng_seq.uniform(shape = (config['quest_num'],),
                                 minval = this_config['quest_qoi_len_in_use_begin'],
                                 maxval = this_config['quest_qoi_len_in_use_end'],
-                                dtype = torch.int32)
+                                dtype = tf.int32)
   quest_cond_len_in_use = quest_qoi_len_in_use + 1
   quest_cond_mask_list = []
   quest_qoi_mask_list = []
   for i in range(config['quest_num']):
     quest_cond_len_in_use_i = quest_cond_len_in_use[i]
     quest_qoi_len_in_use_i = quest_qoi_len_in_use[i]
-    quest_cond_mask_list.append(F.pad(torch.ones((quest_cond_len_in_use_i,), dtype = torch.int32), (0, config['quest_cond_len']-quest_cond_len_in_use_i)))
-    quest_qoi_mask_list.append(F.pad(torch.ones((quest_qoi_len_in_use_i,), dtype = torch.int32), (0, config['quest_qoi_len']-quest_qoi_len_in_use_i)))
-
+    quest_cond_mask_list.append(tf.pad(tf.ones((quest_cond_len_in_use_i,), dtype = tf.int32), [[0, config['quest_cond_len']-quest_cond_len_in_use_i]]))
+    quest_qoi_mask_list.append(tf.pad(tf.ones((quest_qoi_len_in_use_i,), dtype = tf.int32), [[0, config['quest_qoi_len']-quest_qoi_len_in_use_i]]))
 
   demo_cond_mask_list, demo_qoi_mask_list = apply_random_demo_num_in_use(config, this_config, demo_cond_mask_list, demo_qoi_mask_list)
   return equation, demo_cond_k_list, demo_cond_v_list, demo_qoi_k_list, demo_qoi_v_list, \

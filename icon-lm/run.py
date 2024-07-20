@@ -1,9 +1,8 @@
 import torch
-# import tensorflow as tf
-from torch.utils import tensorboard as tb
+import tensorflow as tf
 import os
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-# tf.config.set_visible_devices([], device_type='GPU')
+tf.config.set_visible_devices([], device_type='GPU')
 from pprint import pprint
 import jax.tree_util as tree
 import numpy as np
@@ -12,11 +11,13 @@ from datetime import datetime
 import utils
 from absl import app, flags, logging
 import plot
+import matplotlib as plt
 from einshape import numpy_einshape as einshape
-
-# gpus = tf.config.list_physical_devices(device_type = 'GPU')
-gpus = torch.cuda.device_count()
-print(gpus, flush=True)
+import jax
+gpus = tf.config.list_physical_devices(device_type = 'GPU')
+print("TF GPUs found: ", gpus, flush=True)
+jax_dev = jax.devices()
+print("JAX devices: ", jax_dev, flush=True)
 
 ## Comments with two hashtags (##) are ones Jamie made, comments with one hashtag (#) are original comments
 
@@ -198,21 +199,30 @@ def run_train():
   ## Sets up checkpoint if specified
   if FLAGS.restore_dir is not None:
     runner.restore(FLAGS.restore_dir, FLAGS.restore_step, restore_opt_state=False)
-    
+    print("Restore dir: ", FLAGS.restore_dir, "; Restore step: ", FLAGS.restore_step)
+
+  def ensure_valid_channels(image):
+      # If the image has more than 4 channels, slice to get the first 3 channels
+      if image.shape[-1] > 4:
+          image = image[..., :3]
+      # If the image has less than 3 channels, convert it to 3 channels
+      elif image.shape[-1] < 3:
+          image = tf.image.grayscale_to_rgb(image)
+      return image
+
   if FLAGS.tfboard:
-    results_dir = f'/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/{FLAGS.user}/results/{FLAGS.problem}/'+ stamp
-    file_writer = tb.summary.create_file_writer(results_dir)
+    results_dir = f'/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/{FLAGS.user}/results/{FLAGS.problem}/'+ stamp
+    file_writer = tf.summary.create_file_writer(results_dir)
     file_writer.set_as_default()
-    ckpt_dir = f'/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/save/{FLAGS.user}/ckpts/{FLAGS.problem}/'+ stamp
+    ckpt_dir = f'/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/{FLAGS.user}/ckpts/{FLAGS.problem}/'+ stamp
     if not os.path.exists(ckpt_dir):
       os.makedirs(ckpt_dir)
 
   ## Training loop
   utils.timer.tic("since last print")
-  
+
   ## Main loop over steps 
   for _ in range(FLAGS.epochs * FLAGS.steps_per_epoch + 1):
-
     ## Save at checkpoint if at save frequency
     if FLAGS.tfboard and runner.train_step % (FLAGS.save_freq) == 0:
       logging.info("current time: " + datetime.now(pytz.timezone('America/Chicago')).strftime("%Y%m%d-%H%M%S"))
@@ -221,8 +231,8 @@ def run_train():
     ## LOSS & ERROR 
     # calculate, print and write loss to tfboard
     if FLAGS.profile_level == 0 and ((runner.train_step % FLAGS.loss_freq == 0)
-        or (runner.train_step % (FLAGS.loss_freq//10) == 0 and runner.train_step <= FLAGS.loss_freq) ## Calculate frequently at the beginning
-        or (runner.train_step % (FLAGS.loss_freq//10) == 0 and runner.train_step >= FLAGS.epochs * FLAGS.steps_per_epoch - FLAGS.loss_freq)): 
+        or (runner.train_step % (FLAGS.loss_freq//10) == 0 and runner.train_step <= FLAGS.loss_freq) 
+        or (runner.train_step % (FLAGS.loss_freq//10) == 0 and runner.train_step >= FLAGS.epochs * FLAGS.steps_per_epoch - FLAGS.loss_freq)):
         ## Calculate frequently at the end
       print("==================== step: {}, loss start ====================".format(runner.train_step))
       utils.timer.toc("since last print")
@@ -236,9 +246,9 @@ def run_train():
         this_loss_mean, this_loss_std = np.mean(this_loss), np.std(this_loss)
         print("{} loss: {:.4f}+-{:.4f}".format(dataset.name, this_loss_mean, this_loss_std), flush=True)
         if FLAGS.tfboard:
-          tb.summary.scalar(f'loss/{dataset.name}', this_loss_mean, step = runner.train_step)
-          
-      ## Calculates error for test data 
+          tf.summary.scalar(f'loss/{dataset.name}', this_loss_mean, step = runner.train_step)
+        
+      ## Calculates error for test data     
       equation, caption, data, label = test_data.get_next_data(caption_max_len = model_config['caption_len'])
       for demo_num, caption_id, caption, data in split_data(caption, data, test_demo_num_list, test_caption_id_list):
         # without caption
@@ -248,7 +258,7 @@ def run_train():
           print("test with demo num {}, no caption  , error: {:.4f}+-{:.4f}".format(
                   demo_num, this_error_mean, this_error_std), flush=True)
           if FLAGS.tfboard:
-            tb.summary.scalar(f'test error, demo num: {demo_num}/no caption', this_error_mean, step = runner.train_step)
+            tf.summary.scalar(f'test error, demo num: {demo_num}/no caption', this_error_mean, step = runner.train_step)
         # with caption
         else:
           this_error = runner.get_error(data, label, with_caption = True) # WARNING: it's actually the error for quest, not the loss
@@ -256,18 +266,17 @@ def run_train():
           print("test with demo num {}, caption id {}, error: {:.4f}+-{:.4f}".format(
                   demo_num, caption_id, this_error_mean, this_error_std), flush=True)
           if FLAGS.tfboard:
-            tb.summary.scalar(f'test error, demo num: {demo_num}/caption id: {caption_id}', this_error_mean, step = runner.train_step)
+            tf.summary.scalar(f'test error, demo num: {demo_num}/caption id: {caption_id}', this_error_mean, step = runner.train_step)
       
       utils.timer.toc("calculate, print and write loss to tfboard")
       print("==================== step: {}, loss end ====================".format(runner.train_step))
 
     ## PREDICTION & PLOT
     # make prediction and plot to tfboard
-
     if FLAGS.profile_level == 0 and plot_num > 0 and ((runner.train_step % FLAGS.plot_freq == 0)
         or (runner.train_step % (FLAGS.plot_freq//10) == 0 and runner.train_step <= FLAGS.plot_freq)
         or (runner.train_step % (FLAGS.plot_freq//10) == 0 and runner.train_step >= FLAGS.epochs * FLAGS.steps_per_epoch - FLAGS.plot_freq)):
-
+      
       ## Displays dataset name for both training and testing data
       for dataset in [train_data, test_data]:
         print("==================== {} data: ==================== ".format(dataset.name), flush=True)
@@ -297,7 +306,8 @@ def run_train():
             this_data_ij = tree.tree_map(lambda x: x[fij], this_data)
             figure = plot.plot_data(this_equation_ij, this_caption_ij,
                                     this_data_ij, this_label[fij], this_pred[fij], train_config)
-            tb.summary.image("{} case {}".format(dataset.name, fij), figure, step = runner.train_step)
+            figure = ensure_valid_channels(figure)
+            tf.summary.image("{} case {}".format(dataset.name, fij), figure, step=runner.train_step)
       utils.timer.toc("plot to tfboard")
 
     if FLAGS.profile_level <= 1:
@@ -324,7 +334,7 @@ def main(argv):
   for key, value in FLAGS.__flags.items():
       print(value.name, ": ", value._value, flush=True)
 
-  utils.set_seed(FLAGS.seed + 123456) 
+  tf.random.set_seed(FLAGS.seed + 123456) 
   if FLAGS.main == 'train':
     run_train()
   elif FLAGS.main == 'test':
@@ -342,7 +352,7 @@ if __name__ == '__main__':
   flags.DEFINE_string('problem', 'test', 'folder for storing the model checkpoints and tensorboard logs')
   flags.DEFINE_enum('backend', 'jax', ['jax','torch'], 'backend of runner')
 
-  flags.DEFINE_integer('seed', 43, 'random seed')
+  flags.DEFINE_integer('seed', 42, 'random seed')
 
   flags.DEFINE_boolean('train', True, 'train the neural network')
   flags.DEFINE_integer('profile_level', 0, '0: usual training, 1: profile training, 2: profile without loading data')
@@ -392,4 +402,3 @@ if __name__ == '__main__':
   flags.DEFINE_enum('main', 'train', ['test','train'], 'train or test')
 
   app.run(main)
-

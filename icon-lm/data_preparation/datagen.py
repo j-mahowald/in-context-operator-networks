@@ -346,8 +346,6 @@ def generate_mfc_rhoparam_hj(seed, eqns, quests, length, dx, dt, nu_nx_ratio, nu
                                               all_gs_key = all_gs_key, all_gs_value = all_gs_value,
                                               problem_type = ptype, nt = Nt+1, nx = N)
 
-
-
 def main(argv):
   for key, value in FLAGS.__flags.items():
       print(value.name, ": ", value._value, flush=True)

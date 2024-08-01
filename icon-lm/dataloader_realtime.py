@@ -2,7 +2,7 @@ import numpy as np
 
 import tensorflow as tf
 import torch
-# tf.config.set_visible_devices([], device_type='GPU')
+tf.config.set_visible_devices([], device_type='GPU')
 import os
 from utils import load_json
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'

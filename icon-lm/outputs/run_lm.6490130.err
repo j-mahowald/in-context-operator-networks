@@ -1,0 +1,12 @@
+2024-07-18 17:39:42.817067: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2024-07-18 17:39:42.819723: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2024-07-18 17:39:42.936307: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2024-07-18 17:39:43.222166: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-07-18 17:39:47.295438: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+I0718 17:40:43.729991 47480662979520 runner_jax.py:93] restored params from jamie/ckpts/icon_lm/20240716-143836, step 900000
+I0718 17:40:43.741986 47480662979520 run.py:228] current time: 20240718-174043
+I0718 17:40:44.275342 47480662979520 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240718-174006, step 0
+I0718 22:48:24.099940 47480662979520 run.py:228] current time: 20240718-224824
+I0718 22:48:24.777770 47480662979520 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240718-174006, step 100000
+slurmstepd: error: *** JOB 6490130 ON c199-101 CANCELLED AT 2024-07-18T23:39:35 DUE TO TIME LIMIT ***

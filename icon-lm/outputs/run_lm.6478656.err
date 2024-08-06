@@ -1,0 +1,27 @@
+2024-07-16 14:37:30.479502: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2024-07-16 14:37:30.481904: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2024-07-16 14:37:30.588488: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2024-07-16 14:37:30.848679: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-07-16 14:37:35.539938: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+I0716 14:39:29.915941 47898093499328 run.py:227] current time: 20240716-143929
+I0716 14:39:30.409656 47898093499328 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836, step 0
+I0716 19:46:33.931395 47898093499328 run.py:227] current time: 20240716-194633
+I0716 19:46:34.581544 47898093499328 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836, step 100000
+I0717 00:50:28.188800 47898093499328 run.py:227] current time: 20240717-005028
+I0717 00:50:28.879469 47898093499328 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836, step 200000
+I0717 05:54:35.455514 47898093499328 run.py:227] current time: 20240717-055435
+I0717 05:54:36.217322 47898093499328 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836, step 300000
+I0717 10:58:55.849800 47898093499328 run.py:227] current time: 20240717-105855
+I0717 10:58:56.442897 47898093499328 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836, step 400000
+I0717 16:03:23.623594 47898093499328 run.py:227] current time: 20240717-160323
+I0717 16:03:24.252324 47898093499328 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836, step 500000
+I0717 21:07:30.643567 47898093499328 run.py:227] current time: 20240717-210730
+I0717 21:07:31.329457 47898093499328 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836, step 600000
+I0718 02:10:43.638799 47898093499328 run.py:227] current time: 20240718-021043
+I0718 02:10:44.329656 47898093499328 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836, step 700000
+I0718 07:13:33.540591 47898093499328 run.py:227] current time: 20240718-071333
+I0718 07:13:34.225968 47898093499328 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836, step 800000
+I0718 12:16:16.296258 47898093499328 run.py:227] current time: 20240718-121616
+I0718 12:16:16.964791 47898093499328 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836, step 900000
+slurmstepd: error: *** JOB 6478656 ON c199-051 CANCELLED AT 2024-07-18T14:35:18 DUE TO TIME LIMIT ***

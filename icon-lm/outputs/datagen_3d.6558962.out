@@ -1,0 +1,341 @@
+Environment variables:
+ ;;
+ ;;
+ ;;
+}
+}
+ARCHIVE=/home/09989/jmahowald
+ARCHIVER=ranch.tacc.utexas.edu
+BASH_ENV=/etc/tacc/tacc_functions
+BASH_FUNC_ml()=() {  eval $($LMOD_DIR/ml_cmd "$@")
+BASH_FUNC_module()=() {  if [ -z "${LMOD_SH_DBG_ON+x}" ]; then
+__BASHRC_SOURCED__=1
+ case "$-" in 
+COMPILER_PATH=/opt/apps/xalt/xalt/bin
+CPATH=/opt/intel/compilers_and_libraries_2020.1.217/linux/pstl/include:/opt/intel/compilers_and_libraries_2020.1.217/linux/daal/include:/opt/intel/compilers_and_libraries_2020.1.217/linux/tbb/include:/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/include:/opt/intel/compilers_and_libraries_2020.1.217/linux/ipp/include
+CUDA_VISIBLE_DEVICES=0,1,2,3
+CVS_RSH=ssh
+DAALROOT=/opt/intel/compilers_and_libraries_2020.1.217/linux/daal
+DISPLAY=localhost:11.0
+ echo "Shell debugging restarted";
+ echo "Shell debugging temporarily silenced: export LMOD_SH_DBG_ON=1 for Lmod's output";
+ENVIRONMENT=BATCH
+ esac;
+ eval $($LMOD_CMD bash "$@") && eval $(${LMOD_SETTARG_CMD:-:} -s sh);
+ fi;
+ fi;
+ fi;
+FI_PROVIDER=mlx
+FI_PROVIDER_PATH=/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/libfabric/lib/prov
+FPATH=/usr/local/share/zsh/site-functions:/usr/share/zsh/site-functions:/usr/share/zsh//functions:/opt/apps/lmod/lmod/init/ksh_funcs
+GIT_EXEC_PATH=/opt/apps/git/2.24.1/libexec/git-core
+GIT_TEMPLATE_DIR=/opt/apps/git/2.24.1/share/git-core/templates
+HISTSIZE=1000
+HOME=/home1/09989/jmahowald
+HOSTNAME=c196-101
+HYDRA_BOOTSTRAP=slurm
+HYDRA_LAUNCHER_EXTRA_ARGS=--external-launcher
+ICC_BIN=/opt/intel/compilers_and_libraries_2020.1.217/linux/bin/intel64
+ICC_LIB=/opt/intel/compilers_and_libraries_2020.1.217/linux/compiler/lib/intel64
+IFC_BIN=/opt/intel/compilers_and_libraries_2020.1.217/linux/bin/intel64
+IFC_LIB=/opt/intel/compilers_and_libraries_2020.1.217/linux/compiler/lib/intel64
+ if [ -n "${__lmod_sh_dbg-}" ]; then
+ if [ -n "${__lmod_sh_dbg:-}" ]; then
+I_MPI_CC=icc
+I_MPI_CXX=icpc
+I_MPI_EXTRA_FILESYSTEM=enable
+I_MPI_EXTRA_FILESYSTEM_FORCE=lustre
+I_MPI_F77=ifort
+I_MPI_F90=ifort
+I_MPI_FC=ifort
+I_MPI_HYDRA_BOOTSTRAP_EXEC_EXTRA_ARGS=--external-launcher
+I_MPI_HYDRA_BOOTSTRAP=slurm
+I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
+I_MPI_ROOT=/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi
+I_MPI_STARTUP_MODE=pmi_shm_netmod
+INCLUDE=/home1/apps/cuda/12.2/include
+__Init_Default_Modules=1
+INPUTRC=/etc/inputrc
+INTEL_LICENSE_FILE=/home1/09989/jmahowald/intel/licenses:/opt/intel/licenses:/opt/intel/compilers_and_libraries_2020.1.217/linux/licenses
+IPPROOT=/opt/intel/compilers_and_libraries_2020.1.217/linux/ipp
+JAX_PLATFORMS=cuda
+LANG=en_US.UTF-8
+LD_LIBRARY_PATH=/home1/apps/cuda/12.2/lib64:/opt/apps/intel19/python3/3.9.2/lib:/opt/apps/hwloc/1.11.12/lib:/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/libfabric/lib:/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/lib/release:/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/lib:/opt/intel/debugger_2020/libipt/intel64/lib:/opt/intel/compilers_and_libraries_2020.1.217/linux/daal/lib/intel64_lin:/opt/intel/compilers_and_libraries_2020.1.217/linux/tbb/lib/intel64_lin/gcc4.8:/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2020.1.217/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2020.1.217/linux/compiler/lib/intel64_lin:/opt/apps/gcc/8.3.0/lib64:/opt/apps/gcc/8.3.0/lib:/usr/lib64
+LD_PRELOAD=/opt/apps/xalt/xalt/lib64/libxalt_init.so
+LESSOPEN=||/usr/bin/lesspipe.sh %s
+LIBRARY_PATH=/opt/intel/debugger_2020/libipt/intel64/lib:/opt/intel/compilers_and_libraries_2020.1.217/linux/daal/lib/intel64_lin:/opt/intel/compilers_and_libraries_2020.1.217/linux/tbb/lib/intel64/gcc4.8:/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/lib/intel64_lin:/opt/intel/compilers_and_libraries_2020.1.217/linux/ipp/lib/intel64:/opt/intel/compilers_and_libraries_2020.1.217/linux/compiler/lib/intel64_lin
+_LMFILES_=/opt/apps/modulefiles/intel/19.1.1.lua:/opt/apps/intel19/modulefiles/impi/19.0.9.lua:/opt/apps/modulefiles/autotools/1.2.lua:/opt/apps/modulefiles/cmake/3.24.2.lua:/opt/apps/modulefiles/hwloc/1.11.12.lua:/opt/apps/modulefiles/xalt/2.10.34.lua:/opt/apps/modulefiles/TACC.lua:/opt/apps/intel19/impi19_0/modulefiles/python3/3.9.2.lua:/opt/apps/modulefiles/git/2.24.1.lua:/opt/apps/modulefiles/cuda/12.2.lua
+LMOD_CMD=/opt/apps/lmod/lmod/libexec/lmod
+LMOD_DIR=/opt/apps/lmod/lmod/libexec
+LMOD_FAMILY_COMPILER=intel
+LMOD_FAMILY_COMPILER_VERSION=19.1.1
+LMOD_FAMILY_LIBFABRIC=impi
+LMOD_FAMILY_LIBFABRIC_VERSION=19.0.9
+LMOD_FAMILY_MPI=impi
+LMOD_FAMILY_MPI_VERSION=19.0.9
+LMOD_FAMILY_PYTHON=python3
+LMOD_FAMILY_PYTHON_VERSION=3.9.2
+LMOD_PKG=/opt/apps/lmod/lmod
+__LMOD_Priority_PATH=/opt/apps/xalt/xalt/bin:-100
+__LMOD_REF_COUNT_COMPILER_PATH=/opt/apps/xalt/xalt/bin:1
+__LMOD_REF_COUNT_CPATH=/opt/intel/compilers_and_libraries_2020.1.217/linux/pstl/include:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/daal/include:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/tbb/include:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/include:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/ipp/include:1
+__LMOD_REF_COUNT_I_MPI_ROOT=/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi:1
+__LMOD_REF_COUNT_INCLUDE=/home1/apps/cuda/12.2/include:1
+__LMOD_REF_COUNT_INTEL_LICENSE_FILE=/home1/09989/jmahowald/intel/licenses:1;/opt/intel/licenses:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/licenses:1
+__LMOD_REF_COUNT_LD_LIBRARY_PATH=/home1/apps/cuda/12.2/lib64:1;/opt/apps/intel19/python3/3.9.2/lib:1;/opt/apps/hwloc/1.11.12/lib:1;/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/libfabric/lib:1;/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/lib/release:1;/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/lib:1;/opt/intel/debugger_2020/libipt/intel64/lib:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/daal/lib/intel64_lin:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/tbb/lib/intel64_lin/gcc4.8:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/lib/intel64_lin:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/ipp/lib/intel64:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/compiler/lib/intel64_lin:1;/opt/apps/gcc/8.3.0/lib64:1;/opt/apps/gcc/8.3.0/lib:1;/usr/lib64:1
+__LMOD_REF_COUNT_LD_PRELOAD=/opt/apps/xalt/xalt/lib64/libxalt_init.so:1
+__LMOD_REF_COUNT_LIBRARY_PATH=/opt/intel/debugger_2020/libipt/intel64/lib:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/daal/lib/intel64_lin:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/tbb/lib/intel64/gcc4.8:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/lib/intel64_lin:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/ipp/lib/intel64:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/compiler/lib/intel64_lin:1
+__LMOD_REF_COUNT_MANPATH=/home1/apps/cuda/12.2/doc/man:1;/opt/apps/git/2.24.1/share/man:1;/opt/apps/intel19/python3/3.9.2/share/man:1;/opt/apps/intel19/python3/3.9.2/man:1;/usr/local/man:1;/usr/share/man:2;/usr/X11R6/man:1;/usr/kerberos/man:1;/usr/man:1;/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/man:1;/opt/intel/documentation_2020/en/man/common:1;/opt/intel/documentation_2020/en/debugger/gdb-ia/man:1;/usr/local/share/man:1;/opt/ddn/ime/share/man:2
+__LMOD_REF_COUNT_MODULEPATH=/opt/apps/cuda12_2/modulefiles:1;/opt/apps/intel19/impi19_0/python3_9/modulefiles:1;/opt/apps/intel19/python3_9/modulefiles:1;/opt/apps/intel19/impi19_0/modulefiles:1;/opt/apps/intel19/modulefiles:1;/opt/apps/modulefiles:1
+__LMOD_REF_COUNT_NLSPATH=/opt/intel/debugger_2020/gdb/intel64/share/locale/%l_%t/%N:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/compiler/lib/intel64/locale/%l_%t/%N:1
+__LMOD_REF_COUNT_PATH=/opt/apps/xalt/xalt/bin:1;/home1/apps/cuda/12.2/bin:1;/opt/apps/git/2.24.1/bin:1;/opt/apps/intel19/python3/3.9.2/bin:2;/opt/apps/hwloc/1.11.12/bin:1;/opt/apps/cmake/3.24.2/bin:1;/opt/apps/autotools/1.2/bin:1;/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/bin:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/bin/intel64:1;/opt/apps/gcc/8.3.0/bin:1;/usr/lib64/qt-3.3/bin:1;/usr/local/bin:1;/usr/bin:1;/usr/local/sbin:1;/usr/sbin:1;/opt/ddn/ime/bin:1;.:1
+__LMOD_REF_COUNT_PKG_CONFIG_PATH=/home1/apps/cuda/12.2/pkgconfig:1;/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/bin/pkgconfig:1
+__LMOD_REF_COUNT_PYTHONPATH=/opt/apps/intel19/impi19_0/python3/3.9.2/lib/python3.9/site-packages:1
+LMOD_ROOT=/opt/apps/lmod
+__LMOD_SET_FPATH=1
+LMOD_SETTARG_FULL_SUPPORT=yes
+LMOD_SETTARG_TITLE_BAR=yes
+ __lmod_sh_dbg='v'
+ __lmod_sh_dbg='vx'
+ __lmod_sh_dbg='x'
+LMOD_SYSTEM_DEFAULT_MODULES=TACC
+LMOD_VERSION=8.7.40
+LOADEDMODULES=intel/19.1.1:impi/19.0.9:autotools/1.2:cmake/3.24.2:hwloc/1.11.12:xalt/2.10.34:TACC:python3/3.9.2:git/2.24.1:cuda/12.2
+ local _lmod_my_status=$?;
+LOGNAME=jmahowald
+LS_COLORS=rs=0:di=38;5;27:ln=38;5;51:mh=44;38;5;15:pi=40;38;5;11:so=38;5;13:do=38;5;5:bd=48;5;232;38;5;11:cd=48;5;232;38;5;3:or=48;5;232;38;5;9:mi=05;48;5;232;38;5;15:su=48;5;196;38;5;15:sg=48;5;11;38;5;16:ca=48;5;196;38;5;226:tw=48;5;10;38;5;16:ow=48;5;10;38;5;21:st=48;5;21;38;5;15:ex=38;5;34:*.tar=38;5;9:*.tgz=38;5;9:*.arc=38;5;9:*.arj=38;5;9:*.taz=38;5;9:*.lha=38;5;9:*.lz4=38;5;9:*.lzh=38;5;9:*.lzma=38;5;9:*.tlz=38;5;9:*.txz=38;5;9:*.tzo=38;5;9:*.t7z=38;5;9:*.zip=38;5;9:*.z=38;5;9:*.Z=38;5;9:*.dz=38;5;9:*.gz=38;5;9:*.lrz=38;5;9:*.lz=38;5;9:*.lzo=38;5;9:*.xz=38;5;9:*.bz2=38;5;9:*.bz=38;5;9:*.tbz=38;5;9:*.tbz2=38;5;9:*.tz=38;5;9:*.deb=38;5;9:*.rpm=38;5;9:*.jar=38;5;9:*.war=38;5;9:*.ear=38;5;9:*.sar=38;5;9:*.rar=38;5;9:*.alz=38;5;9:*.ace=38;5;9:*.zoo=38;5;9:*.cpio=38;5;9:*.7z=38;5;9:*.rz=38;5;9:*.cab=38;5;9:*.jpg=38;5;13:*.jpeg=38;5;13:*.gif=38;5;13:*.bmp=38;5;13:*.pbm=38;5;13:*.pgm=38;5;13:*.ppm=38;5;13:*.tga=38;5;13:*.xbm=38;5;13:*.xpm=38;5;13:*.tif=38;5;13:*.tiff=38;5;13:*.png=38;5;13:*.svg=38;5;13:*.svgz=38;5;13:*.mng=38;5;13:*.pcx=38;5;13:*.mov=38;5;13:*.mpg=38;5;13:*.mpeg=38;5;13:*.m2v=38;5;13:*.mkv=38;5;13:*.webm=38;5;13:*.ogm=38;5;13:*.mp4=38;5;13:*.m4v=38;5;13:*.mp4v=38;5;13:*.vob=38;5;13:*.qt=38;5;13:*.nuv=38;5;13:*.wmv=38;5;13:*.asf=38;5;13:*.rm=38;5;13:*.rmvb=38;5;13:*.flc=38;5;13:*.avi=38;5;13:*.fli=38;5;13:*.flv=38;5;13:*.gl=38;5;13:*.dl=38;5;13:*.xcf=38;5;13:*.xwd=38;5;13:*.yuv=38;5;13:*.cgm=38;5;13:*.emf=38;5;13:*.axv=38;5;13:*.anx=38;5;13:*.ogv=38;5;13:*.ogx=38;5;13:*.aac=38;5;45:*.au=38;5;45:*.flac=38;5;45:*.mid=38;5;45:*.midi=38;5;45:*.mka=38;5;45:*.mp3=38;5;45:*.mpc=38;5;45:*.ogg=38;5;45:*.ra=38;5;45:*.wav=38;5;45:*.axa=38;5;45:*.oga=38;5;45:*.spx=38;5;45:*.xspf=38;5;45:
+MAIL=/var/spool/mail/jmahowald
+MANPATH=/home1/apps/cuda/12.2/doc/man:/opt/apps/git/2.24.1/share/man:/opt/apps/intel19/python3/3.9.2/share/man:/opt/apps/intel19/python3/3.9.2/man:/usr/local/man:/usr/share/man:/usr/X11R6/man:/usr/kerberos/man:/usr/man:/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/man:/opt/intel/documentation_2020/en/man/common:/opt/intel/documentation_2020/en/debugger/gdb-ia/man:/usr/local/share/man:/opt/ddn/ime/share/man
+MKLROOT=/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl
+MODULEPATH=/opt/apps/cuda12_2/modulefiles:/opt/apps/intel19/impi19_0/python3_9/modulefiles:/opt/apps/intel19/python3_9/modulefiles:/opt/apps/intel19/impi19_0/modulefiles:/opt/apps/intel19/modulefiles:/opt/apps/modulefiles
+MODULESHOME=/opt/apps/lmod/lmod
+_ModuleTable001_=X01vZHVsZVRhYmxlXyA9IHsKTVR2ZXJzaW9uID0gMywKY19yZWJ1aWxkVGltZSA9IGZhbHNlLApjX3Nob3J0VGltZSA9IGZhbHNlLApkZXB0aFQgPSB7fSwKZmFtaWx5ID0gewpNUEkgPSAiaW1waSIsCmNvbXBpbGVyID0gImludGVsIiwKbGliZmFicmljID0gImltcGkiLApweXRob24gPSAicHl0aG9uMyIsCn0sCm1UID0gewpUQUNDID0gewpmbiA9ICIvb3B0L2FwcHMvbW9kdWxlZmlsZXMvVEFDQy5sdWEiLApmdWxsTmFtZSA9ICJUQUNDIiwKbG9hZE9yZGVyID0gNywKcHJvcFQgPSB7fSwKc3RhY2tEZXB0aCA9IDAsCnN0YXR1cyA9ICJhY3RpdmUiLAp1c2VyTmFtZSA9ICJUQUNDIiwKd1YgPSAiTS4qemZpbmFsIiwKfSwKYXV0b3Rvb2xzID0gewpmbiA9ICIvb3B0L2FwcHMv
+_ModuleTable002_=bW9kdWxlZmlsZXMvYXV0b3Rvb2xzLzEuMi5sdWEiLApmdWxsTmFtZSA9ICJhdXRvdG9vbHMvMS4yIiwKbG9hZE9yZGVyID0gMywKcHJvcFQgPSB7fSwKc3RhY2tEZXB0aCA9IDEsCnN0YXR1cyA9ICJhY3RpdmUiLAp1c2VyTmFtZSA9ICJhdXRvdG9vbHMiLAp3ViA9ICJeMDAwMDAwMDEuMDAwMDAwMDAyLip6ZmluYWwiLAp9LApjbWFrZSA9IHsKZm4gPSAiL29wdC9hcHBzL21vZHVsZWZpbGVzL2NtYWtlLzMuMjQuMi5sdWEiLApmdWxsTmFtZSA9ICJjbWFrZS8zLjI0LjIiLApsb2FkT3JkZXIgPSA0LApwcm9wVCA9IHt9LApzdGFja0RlcHRoID0gMSwKc3RhdHVzID0gImFjdGl2ZSIsCnVzZXJOYW1lID0gImNtYWtlIiwKd1YgPSAiXjAwMDAwMDAzLjAwMDAwMDAyNC4wMDAwMDAw
+_ModuleTable003_=MDIuKnpmaW5hbCIsCn0sCmN1ZGEgPSB7CmZuID0gIi9vcHQvYXBwcy9tb2R1bGVmaWxlcy9jdWRhLzEyLjIubHVhIiwKZnVsbE5hbWUgPSAiY3VkYS8xMi4yIiwKbG9hZE9yZGVyID0gMTAsCnByb3BUID0gewphcmNoID0gewpncHUgPSAxLAp9LAp9LApzdGFja0RlcHRoID0gMCwKc3RhdHVzID0gImFjdGl2ZSIsCnVzZXJOYW1lID0gImN1ZGEvMTIuMiIsCndWID0gIjAwMDAwMDAxMi4wMDAwMDAwMDIuKnpmaW5hbCIsCn0sCmdpdCA9IHsKZm4gPSAiL29wdC9hcHBzL21vZHVsZWZpbGVzL2dpdC8yLjI0LjEubHVhIiwKZnVsbE5hbWUgPSAiZ2l0LzIuMjQuMSIsCmxvYWRPcmRlciA9IDksCnByb3BUID0ge30sCnN0YWNrRGVwdGggPSAwLApzdGF0dXMgPSAiYWN0aXZlIiwKdXNl
+_ModuleTable004_=ck5hbWUgPSAiZ2l0IiwKd1YgPSAiMDAwMDAwMDAyLjAwMDAwMDAyNC4wMDAwMDAwMDEuKnpmaW5hbCIsCn0sCmh3bG9jID0gewpmbiA9ICIvb3B0L2FwcHMvbW9kdWxlZmlsZXMvaHdsb2MvMS4xMS4xMi5sdWEiLApmdWxsTmFtZSA9ICJod2xvYy8xLjExLjEyIiwKbG9hZE9yZGVyID0gNSwKcHJvcFQgPSB7fSwKc3RhY2tEZXB0aCA9IDEsCnN0YXR1cyA9ICJhY3RpdmUiLAp1c2VyTmFtZSA9ICJod2xvYy8xLjExLjEyIiwKd1YgPSAiMDAwMDAwMDAxLjAwMDAwMDAxMS4wMDAwMDAwMTIuKnpmaW5hbCIsCn0sCmltcGkgPSB7CmZuID0gIi9vcHQvYXBwcy9pbnRlbDE5L21vZHVsZWZpbGVzL2ltcGkvMTkuMC45Lmx1YSIsCmZ1bGxOYW1lID0gImltcGkvMTkuMC45IiwKbG9hZE9y
+_ModuleTable005_=ZGVyID0gMiwKcHJvcFQgPSB7fSwKc3RhY2tEZXB0aCA9IDEsCnN0YXR1cyA9ICJhY3RpdmUiLAp1c2VyTmFtZSA9ICJpbXBpIiwKd1YgPSAiXjAwMDAwMDE5LjAwMDAwMDAwMC4wMDAwMDAwMDkuKnpmaW5hbCIsCn0sCmludGVsID0gewpmbiA9ICIvb3B0L2FwcHMvbW9kdWxlZmlsZXMvaW50ZWwvMTkuMS4xLmx1YSIsCmZ1bGxOYW1lID0gImludGVsLzE5LjEuMSIsCmxvYWRPcmRlciA9IDEsCnByb3BUID0ge30sCnN0YWNrRGVwdGggPSAxLApzdGF0dXMgPSAiYWN0aXZlIiwKdXNlck5hbWUgPSAiaW50ZWwiLAp3ViA9ICJeMDAwMDAwMTkuMDAwMDAwMDAxLjAwMDAwMDAwMS4qemZpbmFsIiwKfSwKcHl0aG9uMyA9IHsKZm4gPSAiL29wdC9hcHBzL2ludGVsMTkvaW1waTE5XzAv
+_ModuleTable006_=bW9kdWxlZmlsZXMvcHl0aG9uMy8zLjkuMi5sdWEiLApmdWxsTmFtZSA9ICJweXRob24zLzMuOS4yIiwKbG9hZE9yZGVyID0gOCwKbW5hbWVBID0gewp7CmZuID0gIi9vcHQvYXBwcy9pbnRlbDE5L21vZHVsZWZpbGVzL3B5dGhvbjMvMy45LjIubHVhIiwKc24gPSAicHl0aG9uMyIsCnVzZXJOYW1lID0gInB5dGhvbjMvMy45LjIiLAp2ZXJzaW9uID0gIjMuOS4yIiwKfSwKfSwKcHJvcFQgPSB7fSwKc3RhY2tEZXB0aCA9IDAsCnN0YXR1cyA9ICJhY3RpdmUiLAp1c2VyTmFtZSA9ICJweXRob24zLzMuOS4yIiwKd1YgPSAiMDAwMDAwMDAzLjAwMDAwMDAwOS4wMDAwMDAwMDIuKnpmaW5hbCIsCn0sCnhhbHQgPSB7CmZuID0gIi9vcHQvYXBwcy9tb2R1bGVmaWxlcy94YWx0LzIuMTAu
+_ModuleTable007_=MzQubHVhIiwKZnVsbE5hbWUgPSAieGFsdC8yLjEwLjM0IiwKbG9hZE9yZGVyID0gNiwKcHJvcFQgPSB7fSwKc3RhY2tEZXB0aCA9IDEsCnN0YXR1cyA9ICJhY3RpdmUiLAp1c2VyTmFtZSA9ICJ4YWx0IiwKd1YgPSAiMDAwMDAwMDAyLjAwMDAwMDAxMC4wMDAwMDAwMzQuKnpmaW5hbCIsCn0sCn0sCm1wYXRoQSA9IHsKIi9vcHQvYXBwcy9jdWRhMTJfMi9tb2R1bGVmaWxlcyIsICIvb3B0L2FwcHMvaW50ZWwxOS9pbXBpMTlfMC9weXRob24zXzkvbW9kdWxlZmlsZXMiLCAiL29wdC9hcHBzL2ludGVsMTkvcHl0aG9uM185L21vZHVsZWZpbGVzIiwgIi9vcHQvYXBwcy9pbnRlbDE5L2ltcGkxOV8wL21vZHVsZWZpbGVzIiwgIi9vcHQvYXBwcy9pbnRlbDE5L21vZHVsZWZpbGVzIiwg
+_ModuleTable008_=Ii9vcHQvYXBwcy9tb2R1bGVmaWxlcyIsCn0sCnN5c3RlbUJhc2VNUEFUSCA9ICIvb3B0L2FwcHMvbW9kdWxlZmlsZXMiLAp9Cg==
+_ModuleTable_Sz_=8
+MPICH_HOME=/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi
+MPLBACKEND=agg
+NLSPATH=/opt/intel/debugger_2020/gdb/intel64/share/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/lib/intel64_lin/locale/%l_%t/%N:/opt/intel/compilers_and_libraries_2020.1.217/linux/compiler/lib/intel64/locale/%l_%t/%N
+OMPI_MCA_plm_slurm_args=--external-launcher
+OMP_NUM_THREADS=1
+PATH=/work2/09989/jmahowald/frontera/envs/icon-tacc/bin:/opt/apps/xalt/xalt/bin:/home1/apps/cuda/12.2/bin:/opt/apps/git/2.24.1/bin:/opt/apps/intel19/python3/3.9.2/bin:/opt/apps/hwloc/1.11.12/bin:/opt/apps/cmake/3.24.2/bin:/opt/apps/autotools/1.2/bin:/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/bin:/opt/intel/compilers_and_libraries_2020.1.217/linux/bin/intel64:/opt/apps/gcc/8.3.0/bin:/usr/lib64/qt-3.3/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/opt/ddn/ime/bin:.
+__PERSONAL_PATH__=1
+PKG_CONFIG_PATH=/home1/apps/cuda/12.2/pkgconfig:/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/bin/pkgconfig
+PROMPT_COMMAND=${X_SET_TITLE_BAR:-:} "$USER@${SHOST}:${PWD/#$HOME/~}"
+PRTE_MCA_plm_slurm_args=--external-launcher
+PSTLROOT=/opt/intel/compilers_and_libraries_2020.1.217/linux/pstl
+PSXE_2020=1
+PWD=/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm
+PYTHONPATH=/opt/apps/intel19/impi19_0/python3/3.9.2/lib/python3.9/site-packages
+QTDIR=/usr/lib64/qt-3.3
+QT_GRAPHICSSYSTEM_CHECKED=1
+QTINC=/usr/lib64/qt-3.3/include
+QTLIB=/usr/lib64/qt-3.3/lib
+ return $_lmod_my_status
+SCRATCH=/scratch1/09989/jmahowald
+ set -$__lmod_sh_dbg;
+ set +$__lmod_sh_dbg;
+SHELL=/bin/bash
+SHLVL=2
+SLURM_CLUSTER_NAME=frontera
+SLURM_COMMAND=sbatch
+SLURM_CONF=/etc/slurm/slurm.conf
+SLURM_CPUS_ON_NODE=16
+SLURMD_NODENAME=c196-101
+SLURM_GTIDS=0
+SLURM_JOB_ACCOUNT=DMS22021
+SLURM_JOB_CPUS_PER_NODE=16
+SLURM_JOB_END_TIME=1722684943
+SLURM_JOB_GID=825544
+SLURM_JOB_ID=6558962
+SLURM_JOBID=6558962
+SLURM_JOB_NAME=datagen_3d
+SLURM_JOB_NODELIST=c196-101
+SLURM_JOB_NUM_NODES=1
+SLURM_JOB_PARTITION=rtx
+SLURM_JOB_QOS=qdefault
+SLURM_JOB_START_TIME=1722663343
+SLURM_JOB_UID=893381
+SLURM_JOB_USER=jmahowald
+SLURM_LOCALID=0
+SLURM_NNODES=1
+SLURM_NODEID=0
+SLURM_NODELIST=c196-101
+SLURM_NPROCS=4
+SLURM_NTASKS=4
+SLURM_PRIO_PROCESS=0
+SLURM_PROCID=0
+SLURM_QUEUE=rtx
+SLURM_SUBMIT_DIR=/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm
+SLURM_SUBMIT_HOST=login1.frontera.tacc.utexas.edu
+SLURM_TACC_CORES=4
+SLURM_TACC_JOBNAME=datagen_3d
+SLURM_TACC_NCORES_SET=1
+SLURM_TACC_NNODES_SET=1
+SLURM_TACC_NODES=1
+SLURM_TACC_RUNLIMIT_MINS=360
+SLURM_TASK_PID=13486
+SLURM_TASKS_PER_NODE=4
+SLURM_TOPOLOGY_ADDR=c196-101
+SLURM_TOPOLOGY_ADDR_PATTERN=node
+SSH_CLIENT=128.62.208.234 11796 22
+SSH_CONNECTION=128.62.208.234 11796 129.114.63.98 22
+SSH_TTY=/dev/pts/268
+STOCKYARD2=/work2/09989/jmahowald
+STOCKYARD=/work2/09989/jmahowald
+TACC_AUTOTOOLS_BIN=/opt/apps/autotools/1.2/bin
+TACC_AUTOTOOLS_DIR=/opt/apps/autotools/1.2
+TACC_CMAKE_BIN=/opt/apps/cmake/3.24.2/bin
+TACC_CMAKE_DIR=/opt/apps/cmake/3.24.2
+TACC_CUDA_BIN=/home1/apps/cuda/12.2/bin
+TACC_CUDA_DIR=/home1/apps/cuda/12.2
+TACC_CUDA_DOC=/home1/apps/cuda/12.2/doc
+TACC_CUDA_INC=/home1/apps/cuda/12.2/include
+TACC_CUDA_LIB=/home1/apps/cuda/12.2/lib64
+TACC_DOMAIN=frontera
+TACC_FAMILY_COMPILER=intel
+TACC_FAMILY_COMPILER_VERSION=19.1.1
+TACC_FAMILY_LIBFABRIC=impi
+TACC_FAMILY_LIBFABRIC_VERSION=19.0.9
+TACC_FAMILY_MPI=impi
+TACC_FAMILY_MPI_VERSION=19.0.9
+TACC_FAMILY_PYTHON=python3
+TACC_FAMILY_PYTHON_VERSION=3.9.2
+TACC_GIT_BIN=/opt/apps/git/2.24.1/bin
+TACC_GIT_DIR=/opt/apps/git/2.24.1
+TACC_GIT_LIB=/opt/apps/git/2.24.1/lib
+TACC_HWLOC_BIN=/opt/apps/hwloc/1.11.12/bin
+TACC_HWLOC_DIR=/opt/apps/hwloc/1.11.12
+TACC_HWLOC_INC=/opt/apps/hwloc/1.11.12/include
+TACC_HWLOC_LIB=/opt/apps/hwloc/1.11.12/lib
+TACC_IMPI_BIN=/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/bin
+TACC_IMPI_DIR=/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi
+TACC_IMPI_INC=/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/include
+TACC_IMPI_LIB=/opt/intel/compilers_and_libraries_2020.4.304/linux/mpi/intel64/lib
+TACC_INTEL_BIN=/opt/intel/compilers_and_libraries_2020.1.217/linux/bin/intel64
+TACC_INTEL_DIR=/opt/intel/compilers_and_libraries_2020.1.217/linux
+TACC_INTEL_INC=/opt/intel/compilers_and_libraries_2020.1.217/linux/compiler/include/intel64
+TACC_INTEL_LIB=/opt/intel/compilers_and_libraries_2020.1.217/linux/compiler/lib/intel64
+TACC_MKL_DIR=/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl
+TACC_MKL_INC=/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/include
+TACC_MKL_LIB=/opt/intel/compilers_and_libraries_2020.1.217/linux/mkl/lib/intel64
+TACC_MPI_GETMODE=impi_hydra
+TACC_OVERRIDE_PROJECT=DMS22021
+TACC_PYTHON_BIN=/opt/apps/intel19/python3/3.9.2/bin
+TACC_PYTHON_DIR=/opt/apps/intel19/python3/3.9.2
+TACC_PYTHON_INC=/opt/apps/intel19/python3/3.9.2/include
+TACC_PYTHON_LIB=/opt/apps/intel19/python3/3.9.2/lib
+TACC_PYTHON_MAN=/opt/apps/intel19/python3/3.9.2/share/man:/opt/apps/intel19/python3/3.9.2/man
+TACC_PYTHON_VER=3.9
+TACC_SYSTEM=frontera
+TACC_VEC_FLAGS=-xCORE-AVX2 -axCORE-AVX512
+TACC_XALT_BIN=/opt/apps/xalt/xalt/bin
+TACC_XALT_DIR=/opt/apps/xalt/xalt/
+TBBROOT=/opt/intel/compilers_and_libraries_2020.1.217/linux/tbb
+TERM=xterm-256color
+TMPDIR=/tmp
+__TRACKER__=1
+UCX_DC_MLX5_RETRY_COUNT=40
+UCX_DC_MLX5_TIMEOUT=1200000.00us
+UCX_RC_MLX5_RETRY_COUNT=40
+UCX_RC_MLX5_TIMEOUT=1200000.00us
+UCX_TLS=knem,dc_x,rc
+UCX_UD_MLX5_TIMEOUT=600000000.00us
+ unset __lmod_sh_dbg;
+USER=jmahowald
+_=/usr/bin/env
+ *v*)
+VIRTUAL_ENV=/work2/09989/jmahowald/frontera/envs/icon-tacc
+ *v*x*)
+WORK2=/work2/09989/jmahowald/frontera
+WORK=/work2/09989/jmahowald/frontera
+ *x*)
+XALT_EXECUTABLE_TRACKING=yes
+XALT_SAMPLING=yes
+XDG_DATA_DIRS=/home1/09989/jmahowald/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
+XDG_RUNTIME_DIR=/run/user/893381
+XDG_SESSION_ID=186580
+XLA_FLAGS=--xla_gpu_cuda_data_dir=/work2/09989/jmahowald/frontera/envs/icon-tacc/lib/python3.9/site-packages/jax_cuda12_plugin
+Running: python3 data_preparation/data_pde_3d.py --dir data --caption_mode test --name test --eqns 50 --quests 5 --length_x 50 --length_t 50 --dx 0.02 --dt 0.02 --eqn_types pde_linear_3d --seed 110
+logtostderr :  False
+alsologtostderr :  False
+log_dir :  
+verbosity :  0
+verbosity :  0
+logger_levels :  {}
+stderrthreshold :  fatal
+showprefixforinfo :  True
+run_with_pdb :  False
+pdb_post_mortem :  False
+pdb :  None
+run_with_profiling :  False
+profile_file :  None
+use_cprofile_for_profiling :  True
+only_check_args :  False
+test_srcdir :  
+test_tmpdir :  /tmp/absl_testing
+test_random_seed :  301
+test_randomize_ordering_seed :  
+xml_output_file :  
+chex_n_cpu_devices :  1
+chex_assert_multiple_cpu_devices :  False
+chex_skip_pmap_variant_if_single_device :  True
+op_conversion_fallback_to_while_loop :  True
+delta_threshold :  0.5
+tt_check_filter :  False
+tt_single_core_summaries :  False
+runtime_oom_exit :  True
+hbm_oom_exit :  True
+caption_mode :  test
+num :  50
+quests :  5
+eqns :  50
+length_x :  50
+length_t :  50
+dt :  0.02
+dx :  0.02
+name :  test
+dir :  data
+eqn_types :  ['pde_linear_3d']
+write :  []
+seed :  110
+eqn_mode :  random_-1_1
+file_split :  10
+truncate :  None
+help :  False
+help :  False
+helpshort :  False
+helpfull :  False
+helpxml :  False
+..................................................===========data/test_pde_linear_3d_forward.tfrecord===========
+-------------------------------------------------- 1 --------------------------------------------------
+equation: pde_linear_3d_forward_-0.70540113_-0.20963217_-0.42113170_0.51415369_0.13008872_-0.81391909
+cond_k.shape:  (50, 2601, 2), cond_v.shape: (50, 2601, 1), qoi_k.shape: (50, 2601, 2), qoi_v.shape: (50, 2601, 1)
+-------------------------------------------------- 2 --------------------------------------------------
+equation: pde_linear_3d_forward_-0.70540113_-0.20963217_-0.42113170_0.51415369_0.13008872_-0.81391909
+cond_k.shape:  (50, 2601, 2), cond_v.shape: (50, 2601, 1), qoi_k.shape: (50, 2601, 2), qoi_v.shape: (50, 2601, 1)
+-------------------------------------------------- 3 --------------------------------------------------
+equation: pde_linear_3d_forward_-0.70540113_-0.20963217_-0.42113170_0.51415369_0.13008872_-0.81391909
+cond_k.shape:  (50, 2601, 2), cond_v.shape: (50, 2601, 1), qoi_k.shape: (50, 2601, 2), qoi_v.shape: (50, 2601, 1)
+-------------------------------------------------- 4 --------------------------------------------------
+equation: pde_linear_3d_forward_-0.70540113_-0.20963217_-0.42113170_0.51415369_0.13008872_-0.81391909
+cond_k.shape:  (50, 2601, 2), cond_v.shape: (50, 2601, 1), qoi_k.shape: (50, 2601, 2), qoi_v.shape: (50, 2601, 1)
+===========data/test_pde_linear_3d_inverse.tfrecord===========
+-------------------------------------------------- 1 --------------------------------------------------
+equation: pde_linear_3d_inverse_-0.70540113_-0.20963217_-0.42113170_0.51415369_0.13008872_-0.81391909
+cond_k.shape:  (50, 2601, 2), cond_v.shape: (50, 2601, 1), qoi_k.shape: (50, 2601, 2), qoi_v.shape: (50, 2601, 1)
+-------------------------------------------------- 2 --------------------------------------------------
+equation: pde_linear_3d_inverse_-0.70540113_-0.20963217_-0.42113170_0.51415369_0.13008872_-0.81391909
+cond_k.shape:  (50, 2601, 2), cond_v.shape: (50, 2601, 1), qoi_k.shape: (50, 2601, 2), qoi_v.shape: (50, 2601, 1)
+-------------------------------------------------- 3 --------------------------------------------------
+equation: pde_linear_3d_inverse_-0.70540113_-0.20963217_-0.42113170_0.51415369_0.13008872_-0.81391909
+cond_k.shape:  (50, 2601, 2), cond_v.shape: (50, 2601, 1), qoi_k.shape: (50, 2601, 2), qoi_v.shape: (50, 2601, 1)
+-------------------------------------------------- 4 --------------------------------------------------
+equation: pde_linear_3d_inverse_-0.70540113_-0.20963217_-0.42113170_0.51415369_0.13008872_-0.81391909
+cond_k.shape:  (50, 2601, 2), cond_v.shape: (50, 2601, 1), qoi_k.shape: (50, 2601, 2), qoi_v.shape: (50, 2601, 1)
+Data generation completed successfully

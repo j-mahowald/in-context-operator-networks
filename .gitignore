@@ -2,11 +2,11 @@
 **/*.pyc
 useless/*
 **/results*/*
-**/*pkl
-icon-lm/analysis/icon_lm_learn_s10-20240716-143836/result_dict.pkl
+*result_dict*
 **/*log
 **/check_points*/*
 **/*pickle
 **/*tfrecord
 **/*pdf
 **/*png
+icon-lm/analysis/**/result_dict.pkl

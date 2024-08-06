@@ -187,6 +187,7 @@ def plot_2D(result_dict, plot_index):
     shading = 'gouraud'
     x_size = 51
     t_size = 51
+    both_size = x_size * t_size
 
     raw = result_dict['raw']
     raw = tree.tree_map(lambda a : einshape("bn(xt)i->bnxti", a, x = x_size, t = t_size), raw)
@@ -213,7 +214,7 @@ def plot_2D(result_dict, plot_index):
     data_quest_qoi_mask = data.quest_qoi_mask[plot_index,...] # [1,2601]
 
 
-    pred = einshape("b(xt)i->bxti", result_dict['pred'], x = x_size, t = t_size) # [bs, 51, 51, 1]
+    pred = einshape("b(xt)i->bxti", result_dict['pred'], x = x_size, t = t_size) # [bs, 51, 51, 1] [bs, x_size * t_size, i]
     pred = pred[plot_index,...] # [51, 51, 1]
 
     plt.close('all')
@@ -324,7 +325,7 @@ if __name__ == '__main__':
   flags.DEFINE_float('evmin', -0.04, 'error vmin')
   flags.DEFINE_float('evmax', 0.04, 'error vmax')
 
-  flags.DEFINE_list('test_data_dirs', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data', 'directories of testing data')
+  flags.DEFINE_list('test_data_dirs', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data/pde_linear_3d', 'directories of testing data')
   flags.DEFINE_list('test_data_globs', ['test_pde_linear_3d*'], 'filename glob patterns of testing data')
   flags.DEFINE_string('test_config_filename', 'test_3d_pde_config.json', 'config file for testing')
   flags.DEFINE_list('test_demo_num_list', [1,2,3,4,5], 'demo number list for testing')
@@ -338,8 +339,8 @@ if __name__ == '__main__':
   flags.DEFINE_string('model_config_filename', 'model_lm_config.json', 'config file for model')
   flags.DEFINE_string('analysis_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s1-20240716-143836', 'write file to dir')
   flags.DEFINE_string('results_name', '', 'additional file name for results')
-  flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836/', 'restore directory')
-  flags.DEFINE_integer('restore_step', 900000, 'restore step')
+  flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-120346', 'restore directory')
+  flags.DEFINE_integer('restore_step', 50000, 'restore step')
 
 
   app.run(main)

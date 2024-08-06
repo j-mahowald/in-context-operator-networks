@@ -3,6 +3,7 @@
 useless/*
 **/results*/*
 **/*pkl
+icon-lm/analysis/icon_lm_learn_s10-20240716-143836/result_dict.pkl
 **/*log
 **/check_points*/*
 **/*pickle

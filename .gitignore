@@ -2,6 +2,7 @@
 **/*.pyc
 useless/*
 **/results*/*
+**/*pkl
 **/*log
 **/check_points*/*
 **/*pickle

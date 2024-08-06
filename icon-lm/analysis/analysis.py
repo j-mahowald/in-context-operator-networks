@@ -347,7 +347,7 @@ if __name__ == '__main__':
 
   flags.DEFINE_integer('batch_size', 128, 'batch size')
   flags.DEFINE_list('loss_mode', ['nocap'], 'loss mode')
-  flags.DEFINE_list('write', [], 'write mode')
+  flags.DEFINE_list('write', ['quest', 'demo', 'equation'], 'write mode')
 
   flags.DEFINE_string('model', 'icon_lm', 'model name')
   flags.DEFINE_string('model_config_filename', '../config_model/model_gpt2_config.json', 'config file for model')

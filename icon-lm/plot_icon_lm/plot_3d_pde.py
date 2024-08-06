@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import matplotlib.gridspec as gridspec
 
-# Plots MFC graphs of the type on ICON1, p. 12
+# Plots 3D linear PDE graphs
 
 def run_analysis():
 
@@ -168,13 +168,12 @@ def run_analysis():
   pred = runner.get_pred(data, with_caption = False)
   print("pred:", pred.shape) #(2, 2, 2600, 1)
 
-  # merge batch and device dimension
+# merge batch and device dimension
   result_dict['raw'] = raw
   result_dict['data'] = tree.tree_map(lambda x : einshape('bi...->(bi)...', x), data)
   result_dict['label'] = einshape('bi...->(bi)...', label)
   result_dict['pred'] = einshape('bi...->(bi)...', pred)
   return result_dict
-
 
 def plot_2D(result_dict, plot_index):
     
@@ -183,49 +182,49 @@ def plot_2D(result_dict, plot_index):
     vmax = FLAGS.vmax
     evmin = FLAGS.evmin
     evmax = FLAGS.evmax
-    rhocmap = 'GnBu'
+    soln_cmap = 'GnBu'
     errcmap = 'bwr'
     shading = 'gouraud'
-    x_size = 100  
-
+    x_size = 51
+    t_size = 51
 
     raw = result_dict['raw']
-    raw = tree.tree_map(lambda a : einshape("bn(tx)i->bntxi", a, x = x_size), raw)
-    raw_demo_cond_k = raw[0][plot_index,...] # [demo_num, 25, 100, 2]
-    raw_demo_cond_v = raw[1][plot_index,...] # [demo_num, 25, 100, 1]
-    raw_demo_qoi_k = raw[2][plot_index,...] # [demo_num, 26, 100, 2]
-    raw_demo_qoi_v = raw[3][plot_index,...] # [demo_num, 26, 100, 1]
-    raw_quest_cond_k = raw[4][plot_index,...] # [1, 25, 100, 2]
-    raw_quest_cond_v = raw[5][plot_index,...] # [1, 25, 100, 1]
-    raw_quest_qoi_k = raw[6][plot_index,...] # [1, 26, 100, 2]
-    raw_quest_qoi_v = raw[7][plot_index,...] # [1, 26, 100, 1]
+    raw = tree.tree_map(lambda a : einshape("bn(xt)i->bnxti", a, x = x_size, t = t_size), raw)
+    raw_demo_cond_k = raw[0][plot_index,...] # [demo_num, 51, 51, 2]
+    raw_demo_cond_v = raw[1][plot_index,...] # [demo_num, 51, 51, 1]
+    raw_demo_qoi_k = raw[2][plot_index,...] # [demo_num, 51, 51, 2]
+    raw_demo_qoi_v = raw[3][plot_index,...] # [demo_num, 51, 51, 1]
+    raw_quest_cond_k = raw[4][plot_index,...] # [1, 51, 51, 2]
+    raw_quest_cond_v = raw[5][plot_index,...] # [1, 51, 51, 1]
+    raw_quest_qoi_k = raw[6][plot_index,...] # [1, 51, 51, 2]
+    raw_quest_qoi_v = raw[7][plot_index,...] # [1, 51, 51, 1]
 
     data = result_dict['data']
-    data_demo_cond_k = data.demo_cond_k[plot_index,...] # [demo_num,50,3]
-    data_demo_cond_v = data.demo_cond_v[plot_index,...] # [demo_num,50,1]
-    data_demo_cond_mask = data.demo_cond_mask[plot_index,...] # [demo_num,50]
-    data_demo_qoi_k = data.demo_qoi_k[plot_index,...] # [demo_num,50,3]
-    data_demo_qoi_v = data.demo_qoi_v[plot_index,...] # [demo_num,50,1]
-    data_demo_qoi_mask = data.demo_qoi_mask[plot_index,...] # [demo_num,50]
-    data_quest_cond_k = data.quest_cond_k[plot_index,...] # [1,50,3]
-    data_quest_cond_v = data.quest_cond_v[plot_index,...] # [1,50,1]
-    data_quest_cond_mask = data.quest_cond_mask[plot_index,...] # [1,50]
-    data_quest_qoi_k = data.quest_qoi_k[plot_index,...] # [1,2600,3]
-    data_quest_qoi_mask = data.quest_qoi_mask[plot_index,...] # [1,2600]
+    data_demo_cond_k = data.demo_cond_k[plot_index,...] # [demo_num,51,3]
+    data_demo_cond_v = data.demo_cond_v[plot_index,...] # [demo_num,51,1]
+    data_demo_cond_mask = data.demo_cond_mask[plot_index,...] # [demo_num,51]
+    data_demo_qoi_k = data.demo_qoi_k[plot_index,...] # [demo_num,51,3]
+    data_demo_qoi_v = data.demo_qoi_v[plot_index,...] # [demo_num,51,1]
+    data_demo_qoi_mask = data.demo_qoi_mask[plot_index,...] # [demo_num,51]
+    data_quest_cond_k = data.quest_cond_k[plot_index,...] # [1,51,3]
+    data_quest_cond_v = data.quest_cond_v[plot_index,...] # [1,51,1]
+    data_quest_cond_mask = data.quest_cond_mask[plot_index,...] # [1,51]
+    data_quest_qoi_k = data.quest_qoi_k[plot_index,...] # [1,2601,3]
+    data_quest_qoi_mask = data.quest_qoi_mask[plot_index,...] # [1,2601]
 
 
-    pred = einshape("b(tx)i->btxi", result_dict['pred'], x = x_size) # [bs, 26, 100, 1]
-    pred = pred[plot_index,...] # [26, 100, 1]
+    pred = einshape("b(xt)i->bxti", result_dict['pred'], x = x_size, t = t_size) # [bs, 51, 51, 1]
+    pred = pred[plot_index,...] # [51, 51, 1]
 
     plt.close('all')
-    fig = plt.figure(figsize=(9, 3))
+    fig = plt.figure(figsize=(11, 3))
     gs = gridspec.GridSpec(1, 7, width_ratios=[0.1, 0.22, 1, 1, 1, 1, 0.1])  # Create a 1x5 grid of subplots
 
     # Subplot 1: condition
     ax1 = plt.subplot(gs[2])
 
     plt.pcolormesh(raw_quest_cond_k[0,...,0], raw_quest_cond_k[0,...,1], raw_quest_cond_v[0,...,0], 
-                   shading = shading, vmin = vmin, vmax = vmax, cmap = rhocmap)
+                   shading = shading, cmap = soln_cmap) # vmin = vmin, vmax = vmax, 
     mask = np.abs(data_quest_cond_mask[0,:] - 1) < 0.01 # around 1
     print(data_quest_cond_k[0,mask,1].shape)
     plt.plot(data_quest_cond_k[0,mask,1], data_quest_cond_k[0,mask,2], 's', markersize=3, color = 'black', alpha = 0.7) 
@@ -236,7 +235,7 @@ def plot_2D(result_dict, plot_index):
     # Subplot 2: ground truth
     ax2 = plt.subplot(gs[3])
     plt.pcolormesh(raw_quest_qoi_k[0,...,0], raw_quest_qoi_k[0,...,1], raw_quest_qoi_v[0,...,0], 
-                   shading = shading, vmin = vmin, vmax = vmax, cmap = rhocmap)
+                   shading = shading, cmap = soln_cmap) # vmin = vmin, vmax = vmax, 
     plt.xlabel(r'$t$')
     plt.yticks([])
     plt.title("question\n QoI ground truth")
@@ -244,7 +243,7 @@ def plot_2D(result_dict, plot_index):
     # Subplot 3: prediction
     ax3 = plt.subplot(gs[4])
     plt.pcolormesh(raw_quest_qoi_k[0,...,0], raw_quest_qoi_k[0,...,1], pred[...,0], 
-                   shading = shading, vmin = vmin, vmax = vmax, cmap = rhocmap)
+                   shading = shading, cmap = soln_cmap) # vmin = vmin, vmax = vmax, 
     plt.xlabel(r'$t$')
     plt.yticks([])
     plt.title("question\n QoI prediction")
@@ -252,7 +251,7 @@ def plot_2D(result_dict, plot_index):
     # Subplot 4: prediction error
     ax4 = plt.subplot(gs[5])
     plt.pcolormesh(raw_quest_qoi_k[0,...,0], raw_quest_qoi_k[0,...,1], pred[...,0] - raw_quest_qoi_v[0,...,0], 
-                   shading = shading, vmin = evmin, vmax = evmax, cmap = errcmap)
+                   shading = shading, cmap = errcmap) # vmin = evmin, vmax = evmax, 
     plt.xlabel(r'$t$')
     plt.yticks([])
     plt.title("question\n QoI error")
@@ -267,34 +266,37 @@ def plot_2D(result_dict, plot_index):
     cbar2 = fig.colorbar(ax4.collections[0], cax=cbar_ax2)
 
     fig.subplots_adjust(hspace=0.1, wspace=0.1)
-    plt.savefig(f"problem_{plot_index}_question.png", dpi = 600, bbox_inches='tight')
+    plt.savefig(f"3d_problem_{plot_index}_question.png", dpi = 600, bbox_inches='tight')
     
-
     # plot demos
-    raw_demo_k = np.concatenate([raw_demo_cond_k, raw_demo_qoi_k], axis = 1) # [demo_num, 51, 100, 2]
-    raw_demo_v = np.concatenate([raw_demo_cond_v, raw_demo_qoi_v], axis = 1) # [demo_num, 51, 100, 1]
     for demo_i in range(demo_num):
       plt.close('all')
-      plt.figure(figsize=(3,3))
-      
-      plt.pcolormesh(raw_demo_k[demo_i,...,0], raw_demo_k[demo_i,...,1], raw_demo_v[demo_i,...,0], 
-                     shading = shading, vmin = vmin, vmax = vmax, cmap = rhocmap)
-      
 
-      mask = np.abs(data_demo_cond_mask[demo_i,:] - 1) < 0.01 # around 1
-      print(data_demo_cond_k[demo_i,mask,1].shape)
-      plt.plot(data_demo_cond_k[demo_i,mask,1], data_demo_cond_k[demo_i,mask,2], 'o', markersize=3, color = 'blue', alpha = 0.7) 
+      fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
+      im1 = ax1.pcolormesh(raw_demo_cond_k[demo_i,...,0], raw_demo_cond_k[demo_i,...,1], raw_demo_cond_v[demo_i,...,0], 
+                          shading=shading, cmap=soln_cmap)
+      fig.colorbar(im1, ax=ax1)
+      mask = np.abs(data_demo_cond_mask[demo_i,:] - 1) < 0.01  # around 1
+      ax1.plot(data_demo_cond_k[demo_i,mask,1], data_demo_cond_k[demo_i,mask,2], 'o', markersize=3, color='blue', alpha=0.7)
+      ax1.set_title('Condition')
 
-      mask = np.abs(data_demo_qoi_mask[demo_i,:] - 1) < 0.01 # around 1
-      print(data_demo_qoi_k[demo_i,mask,1].shape)
-      plt.plot(data_demo_qoi_k[demo_i,mask,1], data_demo_qoi_k[demo_i,mask,2], 'o', markersize=3, color = 'red', alpha = 0.7) 
+      im2 = ax2.pcolormesh(raw_demo_qoi_k[demo_i,...,0], raw_demo_qoi_k[demo_i,...,1], raw_demo_qoi_v[demo_i,...,0], 
+                          shading=shading, cmap=soln_cmap)
+      fig.colorbar(im2, ax=ax2)
+      mask = np.abs(data_demo_qoi_mask[demo_i,:] - 1) < 0.01  # around 1
+      ax2.plot(data_demo_qoi_k[demo_i,mask,1], data_demo_qoi_k[demo_i,mask,2], 'o', markersize=3, color='red', alpha=0.7)
+      ax2.set_title('QOI')
 
+      # Adjust layout and display
+      plt.tight_layout()
+      plt.show()
       
       plt.xlabel(r'$t$')
       plt.ylabel(r'$x$')
       plt.title(f"example #{demo_i + 1}")
       plt.tight_layout()
-      plt.savefig(f"problem_{plot_index}_demo_{demo_i}.png", dpi = 600, bbox_inches='tight')
+      plt.savefig(f"3d_problem_{plot_index}_demo_{demo_i}.png", dpi = 600, bbox_inches='tight')
+
 
 
 def main(argv):
@@ -305,7 +307,6 @@ def main(argv):
   result_dict = run_analysis()
   for i in range(FLAGS.batch_size):
     plot_2D(result_dict, i)
-
 
 if __name__ == '__main__':
 
@@ -324,8 +325,8 @@ if __name__ == '__main__':
   flags.DEFINE_float('evmax', 0.04, 'error vmax')
 
   flags.DEFINE_list('test_data_dirs', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data', 'directories of testing data')
-  flags.DEFINE_list('test_data_globs', ['train_mfc_gparam_hj_forward22*'], 'filename glob patterns of testing data')
-  flags.DEFINE_string('test_config_filename', 'test_lm_plot_mfc_config.json', 'config file for testing')
+  flags.DEFINE_list('test_data_globs', ['test_pde_linear_3d*'], 'filename glob patterns of testing data')
+  flags.DEFINE_string('test_config_filename', 'test_3d_pde_config.json', 'config file for testing')
   flags.DEFINE_list('test_demo_num_list', [1,2,3,4,5], 'demo number list for testing')
   flags.DEFINE_list('test_caption_id_list', [-1], 'caption id list for testing')
 
@@ -334,7 +335,7 @@ if __name__ == '__main__':
   flags.DEFINE_list('write', [], 'write mode')
 
   flags.DEFINE_string('model', 'icon_lm', 'model name')
-  flags.DEFINE_string('model_config_filename', '../config_model/model_lm_config.json', 'config file for model')
+  flags.DEFINE_string('model_config_filename', 'model_lm_config.json', 'config file for model')
   flags.DEFINE_string('analysis_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s1-20240716-143836', 'write file to dir')
   flags.DEFINE_string('results_name', '', 'additional file name for results')
   flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836/', 'restore directory')

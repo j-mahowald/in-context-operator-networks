@@ -22,6 +22,8 @@ import random
 import importlib
 from absl import flags
 
+import matplotlib.pyplot as plt
+
 
 def print_eqn_caption(equation, caption, num = None, decode = False):
   if num is None:
@@ -204,7 +206,8 @@ def build_feature(equation, caption, input_id, embedding_raw, embedding_pool, em
       quest_qoi_k = tf.pad(quest_qoi_k, [[0,0],[0,0],[1,0]]) # add zero index
     elif tf.strings.regex_full_match(equation, "ode.*inverse.*") \
       or tf.strings.regex_full_match(equation, "series.*") \
-      or tf.strings.regex_full_match(equation, "mfc_gparam.*"):
+      or tf.strings.regex_full_match(equation, "mfc_gparam.*") \
+      or tf.strings.regex_full_match(equation, "pde_linear_3d.*"):
       # add zero index
       demo_cond_k = tf.pad(demo_cond_k, [[0,0],[0,0],[1,0]])
       demo_qoi_k = tf.pad(demo_qoi_k, [[0,0],[0,0],[1,0]])
@@ -300,7 +303,8 @@ def build_sequence(raw, equation, caption, input_id, embedding_raw, embedding_po
                   quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
                   config, this_config)
   else: # other problems
-    if not tf.strings.regex_full_match(equation, ".*weno.*"):
+    if not (tf.strings.regex_full_match(equation, ".*weno.*") or 
+        tf.strings.regex_full_match(equation, ".*pde_linear_3d.*")):
       tf.print("WARNING: see other problems!")
     build_fn = data_sequence.build_others
     this_config = config['others']
@@ -409,12 +413,11 @@ def get_tf_dataset(seed, config, file_names,
     else:
       dataset = dataset.map(partial(parse_function, config = config), num_parallel_calls = num_parallel_calls)
       dataset = dataset.map(partial(select_caption, config = config), num_parallel_calls = num_parallel_calls)
-    
+  
     dataset = dataset.map(partial(select_demo_quest, config = config), num_parallel_calls = num_parallel_calls)
     dataset = dataset.map(partial(build_feature, config = config), num_parallel_calls = num_parallel_calls)
     dataset = dataset.map(partial(build_sequence, config = config), num_parallel_calls = num_parallel_calls)
     dataset = dataset.map(partial(build_model_input, config = config), num_parallel_calls = num_parallel_calls)
-    
     if shuffle_dataset:
       dataset = dataset.shuffle(buffer_size=shuffle_buffer_size, seed = seed + 2)
     dataset = dataset.batch(batch_size=batch_size, drop_remainder=drop_remainder, num_parallel_calls = num_parallel_calls)
@@ -543,13 +546,14 @@ class DataProvider():
     
     return caption
 
-  def get_next_data(self, return_raw = False, caption_max_len = 300):
+  def get_next_data(self, return_raw=False, caption_max_len=300):
+
     raw, equation, caption, input_id, embedding_raw, embedding_pool, embedding_mask, \
     demo_cond_k, demo_cond_v, demo_cond_mask, \
     demo_qoi_k, demo_qoi_v, demo_qoi_mask, \
     quest_cond_k, quest_cond_v, quest_cond_mask, \
     quest_qoi_k, quest_qoi_v, quest_qoi_mask = next(self.dataset)
-    
+
     input_id = input_id.numpy()
     embedding_raw = embedding_raw.numpy()
     embedding_pool = embedding_pool.numpy()

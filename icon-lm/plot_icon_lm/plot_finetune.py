@@ -7,13 +7,13 @@ from absl import app, flags, logging
 import sys
 sys.path.append('../')
 
-# from jax.config import config
+from jax.config import config
 import jax
 config = jax.config
-# import tensorflow as tf
+import tensorflow as tf
 import os
 os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-# tf.config.set_visible_devices([], device_type='GPU')
+tf.config.set_visible_devices([], device_type='GPU')
 import utils
 from plot import get_plot_k_index
 import jax.numpy as jnp

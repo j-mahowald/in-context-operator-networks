@@ -17,7 +17,7 @@ import data_series as series
 import data_pdes as pdes
 import data_mfc_hj as mfc_hj
 import data_writetfrecord as datawrite
-import data_utils
+import data_utils as dutils
 
 def print_dot(i):
   if i % 100 == 0:
@@ -149,7 +149,7 @@ def generate_pde_poisson(seed, eqns, quests, length, dx, num, caption_mode, name
   for i, (coeff_ul, coeff_ur) in enumerate(zip(coeffs_ul, coeffs_ur)):
     for j in range(quests):
       xs = jnp.linspace(0.0, 1.0, N+1)# (N+1,)
-      cs = data_utils.generate_gaussian_process(next(rng), xs, num, kernel = data_utils.rbf_kernel_jax, k_sigma = 2.0, k_l = 0.5) # (num, N+1)
+      cs = dutils.generate_gaussian_process(next(rng), xs, num, kernel = dutils.rbf_kernel_jax, k_sigma = 2.0, k_l = 0.5) # (num, N+1)
       us = pdes.solve_poisson_batch(L, N, coeff_ul, coeff_ur, cs[:,1:-1]) # (num, N+1)
       all_xs.append(einshape("i->jik", xs, j = num, k = 1)) # (num, N+1, 1)
       all_cs.append(einshape("ij->ijk", cs, k = 1)) # (num, N+1, 1)
@@ -188,7 +188,7 @@ def generate_pde_porous(seed, eqns, quests, length, dx, num, caption_mode, name)
   for i, (coeff_ul, coeff_ur, coeff_c, coeff_a) in enumerate(zip(coeffs_ul, coeffs_ur, coeff_cs, coeff_as)):
     for j in range(quests):
       xs = jnp.linspace(0.0, 1.0, N+1)# (N+1,)
-      ks_GP = data_utils.generate_gaussian_process(next(rng), xs, num, kernel = data_utils.rbf_kernel_jax, k_sigma = 1.0, k_l = 0.5) # (num, N+1)
+      ks_GP = dutils.generate_gaussian_process(next(rng), xs, num, kernel = dutils.rbf_kernel_jax, k_sigma = 1.0, k_l = 0.5) # (num, N+1)
       ks = jax.nn.softplus(ks_GP) # (num, N+1)
       us = pdes.solve_porous_batch(L, N, coeff_ul, coeff_ur, coeff_a * lamda, ks[:,1:-1], coeff_c) # (num, N+1)
       all_xs.append(einshape("i->jik", xs, j = num, k = 1)) # (num, N+1, 1)
@@ -227,7 +227,7 @@ def generate_pde_cubic(seed, eqns, quests, length, dx, num, caption_mode, name):
   for i, (coeff_ul, coeff_ur, coeff_k, coeff_a) in enumerate(zip(coeffs_ul, coeffs_ur, coeff_ks, coeff_as)):
     for j in range(quests):
       xs = jnp.linspace(0.0, 1.0, N+1)# (N+1,)
-      us_GP = data_utils.generate_gaussian_process(next(rng), xs, num, kernel = data_utils.rbf_kernel_jax, k_sigma = 1.0, k_l = 0.5) # (num, N+1)  
+      us_GP = dutils.generate_gaussian_process(next(rng), xs, num, kernel = dutils.rbf_kernel_jax, k_sigma = 1.0, k_l = 0.5) # (num, N+1)  
       [us,cs] = pdes.solve_cubic_batch(L, N, us_GP, coeff_ul, coeff_ur, coeff_a * lamda, coeff_k) 
       all_xs.append(einshape("i->jik", xs, j = num, k = 1)) # (num, N+1, 1)
       all_cs.append(einshape("ij->ijk", cs, k = 1)) # (num, N+1, 1)
@@ -269,12 +269,12 @@ def generate_mfc_gparam_hj(seed, eqns, quests, length, dx, dt, nu_nx_ratio, num,
   half_unroll_nums = mfc_hj.get_half_unroll_nums(us, us, ts_grids, terminal_t, diffusion_eps)
   
   rng = hk.PRNGSequence(jax.random.PRNGKey(seed))
-  gs = data_utils.generate_gaussian_process(next(rng), us, eqns, kernel = data_utils.rbf_circle_kernel_jax, k_sigma = 1.0, k_l = 1.0)
+  gs = dutils.generate_gaussian_process(next(rng), us, eqns, kernel = dutils.rbf_circle_kernel_jax, k_sigma = 1.0, k_l = 1.0)
   gs = gs - jnp.mean(gs, axis = -1, keepdims = True) # (eqns, nu)
   all_txs = []; all_rhos = []; all_params = []; all_eqn_captions = []
   for i, g in enumerate(gs):
     for j in range(quests):
-      init_rho = data_utils.generate_gaussian_process(next(rng), us, num, kernel = data_utils.rbf_circle_kernel_jax, k_sigma = 1.0, k_l = 1.0) # (num, nu)
+      init_rho = dutils.generate_gaussian_process(next(rng), us, num, kernel = dutils.rbf_circle_kernel_jax, k_sigma = 1.0, k_l = 1.0) # (num, nu)
       init_rho = jax.nn.softplus(init_rho) # (num, nu), positive
       init_rho = init_rho / jnp.mean(init_rho, axis = -1, keepdims = True) # (num, nu), sum to 1
       g_batch = einshape("i->ji", g, j = num) # (num, nu)
@@ -320,13 +320,13 @@ def generate_mfc_rhoparam_hj(seed, eqns, quests, length, dx, dt, nu_nx_ratio, nu
   half_unroll_nums = mfc_hj.get_half_unroll_nums(us, us, ts_grids, terminal_t, diffusion_eps)
 
   rng = hk.PRNGSequence(jax.random.PRNGKey(seed))
-  init_rhos = data_utils.generate_gaussian_process(next(rng), us, eqns, kernel = data_utils.rbf_circle_kernel_jax, k_sigma = 1.0, k_l = 1.0) # (eqns, nu)
+  init_rhos = dutils.generate_gaussian_process(next(rng), us, eqns, kernel = dutils.rbf_circle_kernel_jax, k_sigma = 1.0, k_l = 1.0) # (eqns, nu)
   init_rhos = jax.nn.softplus(init_rhos) # (eqns, nu), positive
   init_rhos = init_rhos / jnp.mean(init_rhos, axis = -1, keepdims = True) # (eqns, nu)
   all_rhos_key = []; all_rhos_value = []; all_gs_key = []; all_gs_value = []; all_params = []; all_eqn_captions = []
   for i, init_rho in enumerate(init_rhos):
     for j in range(quests):
-      g_batch = data_utils.generate_gaussian_process(next(rng), us, num, kernel = data_utils.rbf_circle_kernel_jax, k_sigma = 1.0, k_l = 1.0)
+      g_batch = dutils.generate_gaussian_process(next(rng), us, num, kernel = dutils.rbf_circle_kernel_jax, k_sigma = 1.0, k_l = 1.0)
       g_batch = g_batch - jnp.mean(g_batch, axis = -1, keepdims = True) # (num, nu)
       init_rho_batch = einshape("i->ji", init_rho, j = num) # (num, nu)
       rhos, _ = mfc_hj.solve_mfc_periodic_batch(g_batch/run_cost, us, init_rho_batch, us, xs_grids, ts_grids, terminal_t, diffusion_eps, half_unroll_nums)
@@ -345,6 +345,62 @@ def generate_mfc_rhoparam_hj(seed, eqns, quests, length, dx, dt, nu_nx_ratio, nu
                                               all_rhos_key = all_rhos_key, all_rhos_value = all_rhos_value, 
                                               all_gs_key = all_gs_key, all_gs_value = all_gs_value,
                                               problem_type = ptype, nt = Nt+1, nx = N)
+
+def generate_pde_linear_3d(seed, eqns, quests, length, dx, dt, num, caption_mode, name):
+  '''
+  a*u_xx + b*u_xt + c*u_tt + d*u_x + e*u_t + f*u = g(x,t)
+  parameters: a, b, ..., f
+  condition: g(x,t)
+  qoi: u(x,t) 
+  '''
+
+  N = length # N_x and N_t are the same to keep things simple
+  L = length * dx
+
+  xs = jnp.linspace(0.0, 1.0, N+1)  # (nx+1,)
+  ts = jnp.linspace(0.0, 1.0, N+1)  # (nt+1,)
+
+  # Create grids with x as the outer dimension
+  xs_grids = einshape('i->ij', xs, j=N+1)  # (nx+1, nt+1)
+  ts_grids = einshape('j->ij', ts, i=N+1)  # (nx+1, nt+1)
+  xs_grids = einshape('ij->(ij)', xs_grids)  # (n_pts), where n_pts = (nx+1) * (nt+1)
+  ts_grids = einshape('ij->(ij)', ts_grids)  # (n_pts), where n_pts = (nx+1) * (nt+1)
+  xts_grids = jnp.stack([xs_grids, ts_grids], axis=-1)  # ((nx+1) * (nt+1), 2)
+  xts_grids_batch = einshape("...->j...", xts_grids, j=num)  # (num, (nx+1) * (nt+1), 2)
+
+  rng = hk.PRNGSequence(jax.random.PRNGKey(seed))
+  coeffs = [jax.random.uniform(next(rng), (eqns,), minval=-1, maxval=1) for _ in range(6)]
+  coeffs = jnp.stack(coeffs, axis=1)
+
+  all_xts = []; all_gs = []; all_uxts = []; all_params = []; all_eqn_captions = []
+  
+  for i in range(eqns):
+    coeff_a, coeff_b, coeff_c, coeff_d, coeff_e, coeff_f = coeffs[i]
+
+    for _ in range(quests):
+      uxts_GP = dutils.generate_gaussian_process_3d(key = next(rng), xs = xs, ts = ts, num = num, 
+                                                  kernel = dutils.rbf_kernel_3d, k_sigma = 1.0, k_l = 0.2) # (num, N_x+1, N_t+1)
+      
+      coeffs_list = [coeff_a, coeff_b, coeff_c, coeff_d, coeff_e, coeff_f]
+      coeffs_pass = jnp.array(coeffs_list)
+
+      _, gs = pdes.solve_pde_linear_3d_batch(L, L, N, N, uxts_GP, coeffs_pass)
+
+      uxts_GP = einshape('ijk->i(jk)', uxts_GP) # (num, (N_x+1)*(N_t+1))
+      gs = einshape('ijk->i(jk)', gs) # (num, (N_x+1)*(N_t+1))
+
+      all_xts.append(np.array(xts_grids_batch))
+      all_gs.append(np.array(gs[..., None]))
+      all_uxts.append(np.array(uxts_GP[..., None]))
+      all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}".format(coeff_a, coeff_b, coeff_c, coeff_d, coeff_e, coeff_f))
+      all_eqn_captions.append(None)
+    print('.', end='', flush=True)  
+
+  for ptype in ["forward", "inverse"]:
+    datawrite.write_pde_3d(name=name, eqn_type="pde_linear_3d",
+                                  all_params=all_params, all_eqn_captions=all_eqn_captions,
+                                  all_xts=all_xts, all_gs=all_gs, all_uxts=all_uxts,
+                                  problem_type=ptype)
 
 def main(argv):
   for key, value in FLAGS.__flags.items():
@@ -394,17 +450,21 @@ def main(argv):
     generate_mfc_rhoparam_hj(seed = FLAGS.seed, eqns = FLAGS.eqns, quests = FLAGS.quests, length = FLAGS.length,
                           dx = FLAGS.dx, dt = FLAGS.dt, nu_nx_ratio = FLAGS.nu_nx_ratio,
                           num = FLAGS.num, caption_mode = FLAGS.caption_mode, name = name)
+
+  if 'pde_linear_3d' in FLAGS.eqn_types:
+    generate_pde_linear_3d(seed=FLAGS.seed, eqns=FLAGS.eqns, quests=FLAGS.quests, length=FLAGS.length, 
+                          caption_mode = FLAGS.caption_mode, dx=FLAGS.dx, dt=FLAGS.dt, num=FLAGS.num, name=name)
     
 if __name__ == "__main__":
 
-  # import tensorflow as tf
+  import tensorflow as tf
   import os
   os.environ['XLA_PYTHON_CLIENT_PREALLOCATE'] = 'false'
-  # tf.config.set_visible_devices([], device_type='GPU')
+  tf.config.set_visible_devices([], device_type='GPU')
 
   FLAGS = flags.FLAGS
   flags.DEFINE_string('caption_mode', None, 'mode for caption')
-  flags.DEFINE_integer('num', 100, 'number of systems in each equation')
+  flags.DEFINE_integer('num', 50, 'number of systems in each equation')
   flags.DEFINE_integer('quests', 1, 'number of questions in each operator')
   flags.DEFINE_integer('eqns', 1000, 'number of equations')
   flags.DEFINE_integer('length', 50, 'length of trajectory and control')

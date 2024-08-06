@@ -76,7 +76,7 @@ def generate_gaussian_process_3d(key, xs, ts, num, kernel, k_sigma, k_l):
     cov += 1e-6 * jnp.eye(cov.shape[0]) # Add a small jitter for numerical stability
     mean = jnp.zeros(cov.shape[0])
     cov = einshape('ii->nii', cov, n=num)
-    u_sample = jax.random.multivariate_normal(key, mean=mean, cov=cov, shape=(num,), method='svd')
+    u_sample = jax.random.multivariate_normal(key, mean=mean, cov=cov, shape=(num,), method='eigh')
     out = u_sample.reshape((num, X.shape[0], X.shape[1])) # (num, N_x+1, N_t+1)
     return out
 

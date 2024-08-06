@@ -256,7 +256,6 @@ def build_others(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
   build_function_kv(demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v, 
                     quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v, 
                     config, this_config)
-  
   demo_cond_mask_list, demo_qoi_mask_list, quest_cond_mask_list, quest_qoi_mask_list = apply_cond_qoi_len_in_use(config, this_config)
   demo_cond_mask_list, demo_qoi_mask_list = apply_random_demo_num_in_use(config, this_config, demo_cond_mask_list, demo_qoi_mask_list)
 

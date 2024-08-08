@@ -6,9 +6,9 @@ export JAX_PLATFORMS=cuda
 export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 # Set other variables
-dir=data
-testeqns=100
-testquests=5
+dir=data/8
+testeqns=100 #100
+testquests=5 #5
 traineqns=1000
 
 # # Print environment for debugging
@@ -35,7 +35,7 @@ run_datagen() {
   # run_datagen test "$testeqns" "$testquests" --length 100 --dx 0.01 --eqn_types pde_cubic_spatial --seed 107 &&
   # run_datagen test "$testeqns" "$testquests" --length 100 --dx 0.01 --dt 0.02 --nu_nx_ratio 1 --eqn_types mfc_gparam_hj --seed 108 && 
   # run_datagen test "$testeqns" "$testquests" --length 100 --dx 0.01 --dt 0.02 --nu_nx_ratio 1 --eqn_types mfc_rhoparam_hj --seed 109 &&
-  run_datagen test "$testeqns" "$testquests" --length 50 --dx 0.02 --dt 0.02 --eqn_types pde_linear_3d --seed 110
+  run_datagen test "$testeqns" "$testquests" --length 8 --dx 0.125 --dt 0.125 --eqn_types pde_linear_3d --seed 110
   # run_datagen train "$traineqns" 1 --length 100 --dt 0.01 --eqn_types series_damped_oscillator --seed 1 &&
   # run_datagen train "$traineqns" 1 --eqn_types ode_auto_const --seed 2 &&
   # run_datagen train "$traineqns" 1 --eqn_types ode_auto_linear1 --seed 3 &&

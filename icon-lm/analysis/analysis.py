@@ -345,7 +345,7 @@ if __name__ == '__main__':
   flags.DEFINE_list('test_demo_num_list', [1,2,3,4,5], 'demo number list for testing')
   flags.DEFINE_list('test_caption_id_list', [-1], 'caption id list for testing')
 
-  flags.DEFINE_integer('batch_size', 128, 'batch size')
+  flags.DEFINE_integer('batch_size', 32, 'batch size')
   flags.DEFINE_list('loss_mode', ['nocap'], 'loss mode')
   flags.DEFINE_list('write', ['quest', 'demo', 'equation'], 'write mode')
 

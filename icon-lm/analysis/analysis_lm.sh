@@ -1,6 +1,6 @@
 # ICON-LM bs=200 seed=9
-stamp="20240716-143836"
-bs=128 seed=10
+stamp="20240716-143836" 
+bs=200 seed=11
 echo "seed=$seed, stamp=$stamp"
 
 CUDA_VISIBLE_DEVICES=0,1,2,3 \

@@ -369,8 +369,10 @@ def generate_pde_linear_3d(seed, eqns, quests, length, dx, dt, num, caption_mode
   xts_grids_batch = einshape("...->j...", xts_grids, j=num)  # (num, (nx+1) * (nt+1), 2)
 
   rng = hk.PRNGSequence(jax.random.PRNGKey(seed))
-  coeffs = [jax.random.uniform(next(rng), (eqns,), minval=-1, maxval=1) for _ in range(6)]
-  coeffs = jnp.stack(coeffs, axis=1)
+  coeffs_1 = [jax.random.uniform(next(rng), (eqns,), minval=-0.05, maxval=0.05) for _ in range(3)]
+  coeffs_2 = [jax.random.uniform(next(rng), (eqns,), minval=-0.1, maxval=0.1) for _ in range(3)] 
+  # Any larger coefficients would create values of g(x,t) >> u(x,t); the model is not trained on that yet
+  coeffs = jnp.stack(coeffs_1 + coeffs_2, axis=1)
 
   all_xts = []; all_gs = []; all_uxts = []; all_params = []; all_eqn_captions = []
   
@@ -464,7 +466,7 @@ if __name__ == "__main__":
 
   FLAGS = flags.FLAGS
   flags.DEFINE_string('caption_mode', None, 'mode for caption')
-  flags.DEFINE_integer('num', 50, 'number of systems in each equation')
+  flags.DEFINE_integer('num', 100, 'number of systems in each equation')
   flags.DEFINE_integer('quests', 1, 'number of questions in each operator')
   flags.DEFINE_integer('eqns', 1000, 'number of equations')
   flags.DEFINE_integer('length', 50, 'length of trajectory and control')

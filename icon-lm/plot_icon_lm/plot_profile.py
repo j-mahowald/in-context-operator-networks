@@ -338,7 +338,7 @@ if __name__ == '__main__':
   flags.DEFINE_string('analysis_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s1-20240716-143836/', 'write file to dir')
   flags.DEFINE_string('results_name', '', 'additional file name for results')
   flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-120346/', 'restore directory')
-  flags.DEFINE_integer('restore_step', 20000, 'restore step')
+  flags.DEFINE_integer('restore_step', 0, 'restore step')
 
 
   app.run(main)

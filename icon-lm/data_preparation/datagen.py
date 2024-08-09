@@ -371,7 +371,7 @@ def generate_pde_linear_3d(seed, eqns, quests, length, dx, dt, num, caption_mode
   rng = hk.PRNGSequence(jax.random.PRNGKey(seed))
   coeffs_1 = [jax.random.uniform(next(rng), (eqns,), minval=-0.05, maxval=0.05) for _ in range(3)]
   coeffs_2 = [jax.random.uniform(next(rng), (eqns,), minval=-0.1, maxval=0.1) for _ in range(3)] 
-  # Any larger coefficients would create values of g(x,t) >> u(x,t); the model is not trained on that yet
+  # Any larger coefficients would create values of g(x,t) >> u(x,t)
   coeffs = jnp.stack(coeffs_1 + coeffs_2, axis=1)
 
   all_xts = []; all_gs = []; all_uxts = []; all_params = []; all_eqn_captions = []

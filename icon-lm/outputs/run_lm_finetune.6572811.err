@@ -1,0 +1,28 @@
+2024-08-08 02:56:48.971597: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2024-08-08 02:56:48.973967: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2024-08-08 02:56:49.099268: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2024-08-08 02:56:49.423333: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2024-08-08 02:57:00.212937: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+I0808 02:58:40.022163 47592844526528 run.py:228] current time: 20240808-025840
+I0808 02:58:40.516242 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 0
+I0808 03:32:29.391206 47592844526528 run.py:228] current time: 20240808-033229
+I0808 03:32:30.114185 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 10000
+I0808 04:03:08.595438 47592844526528 run.py:228] current time: 20240808-040308
+I0808 04:03:09.257161 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 20000
+I0808 04:33:43.986316 47592844526528 run.py:228] current time: 20240808-043343
+I0808 04:33:44.758941 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 30000
+I0808 05:04:21.810414 47592844526528 run.py:228] current time: 20240808-050421
+I0808 05:04:22.524723 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 40000
+I0808 05:34:58.901139 47592844526528 run.py:228] current time: 20240808-053458
+I0808 05:34:59.655367 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 50000
+I0808 06:05:35.874665 47592844526528 run.py:228] current time: 20240808-060535
+I0808 06:05:36.549931 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 60000
+I0808 06:36:13.003620 47592844526528 run.py:228] current time: 20240808-063613
+I0808 06:36:13.615208 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 70000
+I0808 07:06:51.101703 47592844526528 run.py:228] current time: 20240808-070651
+I0808 07:06:51.830341 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 80000
+I0808 07:37:26.155953 47592844526528 run.py:228] current time: 20240808-073726
+I0808 07:37:26.798494 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 90000
+I0808 08:10:22.569327 47592844526528 run.py:228] current time: 20240808-081022
+I0808 08:10:23.242593 47592844526528 runner_jax.py:82] saved to /work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-025803, step 100000

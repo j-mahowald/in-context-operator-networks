@@ -317,7 +317,7 @@ if __name__ == '__main__':
   flags.DEFINE_enum('task', 'ind', ['ind', 'ood', 'len', 'weno_quadratic', 'weno_cubic'], 'task type')
   flags.DEFINE_enum('backend', 'jax', ['jax','torch'], 'backend of runner')
 
-  flags.DEFINE_integer('seed', 1, 'random seed')
+  flags.DEFINE_integer('seed', 145, 'random seed')
 
   flags.DEFINE_integer('demo_num', 3, 'demo num, max 5')
   flags.DEFINE_float('vmin', 0.0, 'vmin')
@@ -339,8 +339,8 @@ if __name__ == '__main__':
   flags.DEFINE_string('model_config_filename', 'model_lm_config.json', 'config file for model')
   flags.DEFINE_string('analysis_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/analysis/icon_lm_learn_s1-20240716-143836', 'write file to dir')
   flags.DEFINE_string('results_name', '', 'additional file name for results')
-  flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/fine_tune/ckpts/icon_lm/20240808-120346', 'restore directory')
-  flags.DEFINE_integer('restore_step', 50000, 'restore step')
+  flags.DEFINE_string('restore_dir', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/jamie/ckpts/icon_lm/20240716-143836', 'restore directory')
+  flags.DEFINE_integer('restore_step', 900000, 'restore step')
 
 
   app.run(main)

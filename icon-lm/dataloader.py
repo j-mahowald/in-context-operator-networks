@@ -22,8 +22,6 @@ import random
 import importlib
 from absl import flags
 
-import matplotlib.pyplot as plt
-
 
 def print_eqn_caption(equation, caption, num = None, decode = False):
   if num is None:
@@ -413,11 +411,12 @@ def get_tf_dataset(seed, config, file_names,
     else:
       dataset = dataset.map(partial(parse_function, config = config), num_parallel_calls = num_parallel_calls)
       dataset = dataset.map(partial(select_caption, config = config), num_parallel_calls = num_parallel_calls)
-  
+    
     dataset = dataset.map(partial(select_demo_quest, config = config), num_parallel_calls = num_parallel_calls)
     dataset = dataset.map(partial(build_feature, config = config), num_parallel_calls = num_parallel_calls)
     dataset = dataset.map(partial(build_sequence, config = config), num_parallel_calls = num_parallel_calls)
     dataset = dataset.map(partial(build_model_input, config = config), num_parallel_calls = num_parallel_calls)
+    
     if shuffle_dataset:
       dataset = dataset.shuffle(buffer_size=shuffle_buffer_size, seed = seed + 2)
     dataset = dataset.batch(batch_size=batch_size, drop_remainder=drop_remainder, num_parallel_calls = num_parallel_calls)
@@ -546,14 +545,13 @@ class DataProvider():
     
     return caption
 
-  def get_next_data(self, return_raw=False, caption_max_len=300):
-
+  def get_next_data(self, return_raw = False, caption_max_len = 300):
     raw, equation, caption, input_id, embedding_raw, embedding_pool, embedding_mask, \
     demo_cond_k, demo_cond_v, demo_cond_mask, \
     demo_qoi_k, demo_qoi_v, demo_qoi_mask, \
     quest_cond_k, quest_cond_v, quest_cond_mask, \
     quest_qoi_k, quest_qoi_v, quest_qoi_mask = next(self.dataset)
-
+    
     input_id = input_id.numpy()
     embedding_raw = embedding_raw.numpy()
     embedding_pool = embedding_pool.numpy()
@@ -653,7 +651,7 @@ if __name__ == "__main__":
     np.set_printoptions(threshold=np.inf, precision=3, suppress=True)
 
     config = utils.load_json('config_data/train_lm_config.json')
-    file_names = '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data/train*'
+    file_names = '/home/shared/icon/data/data0910c/train*'
     config['load_list'] = []
     test(file_names, config)
 

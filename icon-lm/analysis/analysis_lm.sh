@@ -1,9 +1,9 @@
 # ICON-LM bs=200 seed=9
 stamp="20240716-143836" 
-bs=200 seed=11
+bs=200 seed=12
 echo "seed=$seed, stamp=$stamp"
 
-CUDA_VISIBLE_DEVICES=0,1,2,3 \
+CUDA_VISIBLE_DEVICES=0,1 \
 python3 analysis.py \
     --backend jax \
     --model 'icon_lm' \

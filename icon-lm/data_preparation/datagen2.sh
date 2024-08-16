@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # Set environment variables
-export JAX_PLATFORMS=cpu
+export JAX_PLATFORMS=cuda
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 
 # Set other variables
 dir=data

@@ -144,6 +144,8 @@ def build_data_sequence(data, cond_bool_list, qoi_kv_bool_list, qoi_k_bool_list,
   caption not included, since we need to add index matrix later
   '''
   # Handle demo data
+  if data.demo_qoi_k.ndim > 3:
+    data = tree.tree_map(lambda x: x[0,0], data)
   demo_cond = jnp.concatenate([data.demo_cond_k, data.demo_cond_v], axis = -1) # [demo_num, demo_cond_len, k_dim + v_dim]
   demo_qoi_kv = jnp.concatenate([data.demo_qoi_k, data.demo_qoi_v], axis = -1) # [demo_num, demo_qoi_len, k_dim + v_dim]
   demo_qoi_k = jnp.pad(data.demo_qoi_k, ((0,0),(0,0),(0, data.demo_qoi_v.shape[-1])), mode='constant', constant_values=0) # [demo_num, demo_qoi_len, k_dim + v_dim]

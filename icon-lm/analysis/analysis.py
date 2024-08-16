@@ -339,7 +339,7 @@ if __name__ == '__main__':
 
   flags.DEFINE_integer('seed', 44, 'random seed')
 
-  flags.DEFINE_list('test_data_dirs', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data/pde_linear_3d', 'directories of testing data')
+  flags.DEFINE_list('test_data_dirs', '/work2/09989/jmahowald/frontera/in-context-operator-networks/icon-lm/data', 'directories of testing data')
   flags.DEFINE_list('test_data_globs', ['test*'], 'filename glob patterns of testing data')
   flags.DEFINE_string('test_config_filename', 'test_input_id_config.json', 'config file for testing')
   flags.DEFINE_list('test_demo_num_list', [1,2,3,4,5], 'demo number list for testing')

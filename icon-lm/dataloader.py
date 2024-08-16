@@ -545,7 +545,7 @@ class DataProvider():
     
     return caption
 
-  def get_next_data(self, return_raw = False, caption_max_len = 300):
+  def get_next_data(self, return_raw = False, caption_max_len = 0):
     raw, equation, caption, input_id, embedding_raw, embedding_pool, embedding_mask, \
     demo_cond_k, demo_cond_v, demo_cond_mask, \
     demo_qoi_k, demo_qoi_v, demo_qoi_mask, \

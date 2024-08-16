@@ -198,7 +198,7 @@ def run_train():
 
   ## Sets up checkpoint if specified
   if FLAGS.restore_dir is not None:
-    runner.restore(FLAGS.restore_dir, FLAGS.restore_step, restore_opt_state=False)
+    runner.restore(FLAGS.restore_dir, FLAGS.restore_step, FLAGS.restore_opt_state)
     print("Restore dir: ", FLAGS.restore_dir, "; Restore step: ", FLAGS.restore_step)
 
   def ensure_valid_channels(image):
@@ -375,6 +375,7 @@ if __name__ == '__main__':
 
   flags.DEFINE_string('restore_dir', None, 'restore directory')
   flags.DEFINE_integer('restore_step', 1000000, 'restore step')
+  flags.DEFINE_boolean('restore_opt_state', False, 'restore optimizer state')
   flags.DEFINE_string('trainable_mode', 'all', 'trainable variables')
   flags.DEFINE_list('loss_mode', ['cap', 'nocap'], 'loss mode')
 
@@ -393,7 +394,7 @@ if __name__ == '__main__':
   flags.DEFINE_integer('steps_per_loss', 100, 'steps per loss print')
 
   flags.DEFINE_integer('loss_freq', 1000, 'frequency of printing loss')
-  flags.DEFINE_integer('save_freq', 100000, 'frequency of saving model')
+  flags.DEFINE_integer('save_freq', 50000, 'frequency of saving model')
   flags.DEFINE_integer('plot_freq', 10000, 'frequency of plotting to tfboard')
   flags.DEFINE_integer('time_freq', 1000, 'frequency of estimating time')
   flags.DEFINE_integer('plot_num', None, 'number of plot cases to tfboard')

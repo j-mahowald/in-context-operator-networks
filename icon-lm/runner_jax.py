@@ -45,7 +45,7 @@ class Runner():
     else:
       raise ValueError('trainable_mode {} not implemented'.format(trainable_mode))
     
-    self.opt_state = optimizer.init(self.params) # intialize the optimizer
+    self.opt_state = optimizer.init(self.params) # intialize the optimizer, type tuple?
 
     # no multi-gpu yet
     self.predict_with_caption_batch_fn = jax.jit(jax.vmap(self.predict_with_caption_fn, in_axes = [None, 0, 0], out_axes = 0)) # predict in batch  
@@ -57,7 +57,7 @@ class Runner():
     self.params = jax.device_put_replicated(self.params, devices) # replicate the params to all devices
     self.opt_state = jax.device_put_replicated(self.opt_state, devices) # replicate the opt_state to all devices
     self.predict_with_caption_pmap_batch_fn = jax.pmap(self.predict_with_caption_batch_fn, axis_name='devices') # make predictions in batch and devices
-    self.predict_without_caption_pmap_bath_fn = jax.pmap(self.predict_without_caption_batch_fn, axis_name='devices') # make predictions in batch and devices
+    self.predict_without_caption_pmap_batch_fn = jax.pmap(self.predict_without_caption_batch_fn, axis_name='devices') # make predictions in batch and devices
     self.loss_pmap_batch_fn = jax.pmap(self.loss_batch_fn, axis_name='devices') # no average over batch and devices
     self.loss_pmap_batch_ave_fn = jax.pmap(self.loss_batch_ave_fn, axis_name='devices') # average over batch, no average over devices
     self.train_iter = utils.get_train_iter_pmap(self.loss_batch_ave_fn, optimizer)
@@ -72,7 +72,6 @@ class Runner():
   def save(self, save_dir):
     params_path = save_dir + '/{}_params.pickle'.format(self.train_step)
     opt_state_path = save_dir + '/{}_opt_state.pickle'.format(self.train_step)
-
     # only take the first device
     with open(params_path, 'wb') as file:
       pickle.dump(jax.device_get(jax.tree_map(lambda x: x[0], self.params)), file)
@@ -94,11 +93,12 @@ class Runner():
 
     if restore_opt_state:
       with open(opt_state_path, 'rb') as file:
-        opt_state = pickle.load(file)
-        replicate_opt_state = jax.device_put_replicated(opt_state, self.devices) # replicate the opt_state to all devices
-        self.opt_state = update_dict(self.opt_state, replicate_opt_state)
-      logging.info('restored opt state from {}, step {}'.format(save_dir, step))
-  
+        single_device_opt_state = pickle.load(file)        
+        # Recreate the multi-device structure
+        def recreate_structure(x):
+            return jax.device_put_replicated(x, self.devices)
+        self.opt_state = jax.tree_map(recreate_structure, single_device_opt_state)
+          
   def iter(self, data, label):
     '''data: (num_devices, batch_on_each_device, ...)'''
     batch_on_each_device = data.demo_cond_v.shape[1]
@@ -119,7 +119,7 @@ class Runner():
     if with_caption:
       pred = self.predict_with_caption_pmap_batch_fn(self.params, self._next_key(batch_on_each_device), data)
     else:
-      pred = self.predict_without_caption_pmap_bath_fn(self.params, self._next_key(batch_on_each_device), data)
+      pred = self.predict_without_caption_pmap_batch_fn(self.params, self._next_key(batch_on_each_device), data)
     return np.array(pred)
   
   def get_error(self, data, label, with_caption, return_pred = False, average_axis = (-1,)):

@@ -1,4 +1,6 @@
 import jax
+import sys
+sys.path.append("data_preparation")
 config = jax.config
 import jax.numpy as jnp
 from collections import namedtuple
@@ -72,7 +74,7 @@ ode_auto_linear3_batch_fn = jax.jit(jax.vmap(ode_auto_linear3_fn, [0,0, None, No
 
 @partial(jax.jit, static_argnames=('ode_batch_fn','length','num',))
 def generate_one_dyn(key, ode_batch_fn, dt, length, num, k_sigma, k_l, init_range, coeffs,
-                     control = None):
+                     control = None, init = None):
   '''
   generate data for dynamics
   @param 
@@ -94,7 +96,10 @@ def generate_one_dyn(key, ode_batch_fn, dt, length, num, k_sigma, k_l, init_rang
   key, subkey1, subkey2 = jax.random.split(key, num = 3)
   if control is None:
     control = data_utils.generate_gaussian_process(subkey1, ts, num, kernel = data_utils.rbf_kernel_jax, k_sigma = k_sigma, k_l = k_l)
-  init = jax.random.uniform(subkey2, (num,), minval = init_range[0], maxval = init_range[1])
+    print("Generated control shape: ", control.shape)
+  if init is None:
+    init = jax.random.uniform(subkey2, (num,), minval = init_range[0], maxval = init_range[1])
+  print("Control and init shapes: ", control.shape, init.shape)
   # traj[0] = init, final is affected by control[-1]
   _, traj = ode_batch_fn(init, control, dt, *coeffs, euler_step)
   ts_expand = einshape("i->ji", ts, j = num) # (num, N_x)

@@ -166,6 +166,8 @@ class IconGPTModel(nn.Module):
     this is for flexible data shape, will build basic mask, index matrix, and out mask on the fly,
     used for prediction, i.e., only care about question
     '''
+    if data.demo_qoi_k.ndim > 3:
+      data = tree.tree_map(lambda x: x[0,0], data)
     shot_num_min = 0 # useless
     data_shape = tree.tree_map(lambda x: x.shape, data)
     basic_mask, index_matrix, out_mask = build_matrices_from_data_shape(data_shape, self.config, compact, 
@@ -180,6 +182,7 @@ def build_network_fn(data, key, config, return_model = False, compact = True, pr
   config = freeze(config)
   data = tree.tree_map(lambda x: x[0,0], data) # take off device and batch dimension
   data_shape = tree.tree_map(lambda x: x.shape, data)
+  print("Data shape: ", data_shape)
   basic_mask_with_caption, index_matrix_with_caption, out_mask_with_caption = build_matrices_from_data_shape(data_shape, config, compact, 
                                                                                                 mode = 'train', caption_len = config['caption_len'], shot_num_min = 0)
   basic_mask_without_caption, index_matrix_without_caption, out_mask_without_caption = build_matrices_from_data_shape(data_shape, config, compact, 

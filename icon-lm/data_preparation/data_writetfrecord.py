@@ -22,7 +22,7 @@ def serialize_element(equation, caption, cond_k, cond_v, qoi_k, qoi_v, count):
     qoi_k: qoi key, 3D, (num, qoi_length, qoi_k_dim)
     qoi_v: qoi value, 3D, (num, qoi_length, qoi_v_dim)
     '''
-    write_list = FLAGS.write
+    # write_list = FLAGS.write
     _print = count < 5
 
     # utils.print_dot(count, freq = 100, marker = "+")

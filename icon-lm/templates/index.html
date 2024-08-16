@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ODE Auto Const Solver</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>ODE Auto Const Solver</h1>
+    <p>Equation: u'(t) = a1 * c(t) + a2</p>
+    <form id="ode-form">
+        <label for="param1">a1:</label>
+        <input type="number" id="param1" name="param1" step="0.1" value="1.0" required><br><br>
+
+        <label for="param2">a2:</label>
+        <input type="number" id="param2" name="param2" step="0.1" value="0.2" required><br><br>
+
+        <label for="init">Initial condition u(0):</label>
+        <input type="number" id="init" name="init" step="0.1" value="0.0" required><br><br>
+
+        <label for="control">Control function c(t) (comma-separated values):</label>
+        <input type="text" id="control" name="control" value="0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9" required><br><br>
+
+        <label for="demos">Number of demos:</label>
+        <input type="number" id="demos" name="demos" min="1" value="3" required><br><br>
+
+        <input type="submit" value="Solve">
+    </form>
+
+    <canvas id="result-chart" width="400" height="200"></canvas>
+
+    <script>
+        $(document).ready(function() {
+            let chart = null;
+
+            $('#ode-form').submit(function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    param1: $('#param1').val(),
+                    param2: $('#param2').val(),
+                    init: $('#init').val(),
+                    control: $('#control').val(),
+                    demos: $('#demos').val()
+                };
+
+                $.ajax({
+                    url: '/solve',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        if (chart) {
+                            chart.destroy();
+                        }
+
+                        const ctx = document.getElementById('result-chart').getContext('2d');
+                        chart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: response.domain,
+                                datasets: [{
+                                    label: 'Solution u(t)',
+                                    data: response.prediction,  // This is now directly the 1D array
+                                    borderColor: 'rgb(75, 192, 192)',
+                                    tension: 0.1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 't'
+                                        }
+                                    },
+                                    y: {
+                                        title: {
+                                            display: true,
+                                            text: 'u(t)'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

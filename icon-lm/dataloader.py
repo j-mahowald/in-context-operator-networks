@@ -416,7 +416,7 @@ def get_tf_dataset(seed, config, file_names,
     dataset = dataset.map(partial(build_feature, config = config), num_parallel_calls = num_parallel_calls)
     dataset = dataset.map(partial(build_sequence, config = config), num_parallel_calls = num_parallel_calls)
     dataset = dataset.map(partial(build_model_input, config = config), num_parallel_calls = num_parallel_calls)
-    
+      
     if shuffle_dataset:
       dataset = dataset.shuffle(buffer_size=shuffle_buffer_size, seed = seed + 2)
     dataset = dataset.batch(batch_size=batch_size, drop_remainder=drop_remainder, num_parallel_calls = num_parallel_calls)
@@ -426,7 +426,6 @@ def get_tf_dataset(seed, config, file_names,
     options = tf.data.Options()
     options.experimental_deterministic = deterministic
     dataset = dataset.with_options(options)
-
     return dataset
 
 class DataProvider():

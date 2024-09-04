@@ -3,48 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ODE Auto Const Solver</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>ODE Const Solver</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto mono', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgb(236, 230, 221) 
+        }
+
+        .equation-form {
+            max-width: 600px;
+            width: 100%;
+            background-color: rgb(224, 218, 202);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 10px 10px 10px rgb(210, 206, 196)
+        }
+        .equation-select-wrapper {
+            margin-bottom: 20px; /* Add space below the dropdown */
+        }
+        .content-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column; /* Changed to column */
+            align-items: flex-start; /* Align items to the start */
+            margin-left: 10%; /* This pushes the content slightly to the right */
+        }
+        form > * {
+            margin-bottom: 10px;
+        }
+        input[type="submit"] {
+            margin-top: 20px;
+        }
+        #result-chart {
+            margin-top: 20px;
+        }
+    </style>
+
 </head>
 <body>
-    <h1>ODE Auto Const Solver</h1>
-    <p>Equation: u'(t) = a1 * c(t) + a2</p>
-    <form id="ode-form">
-        <label for="param1">a1:</label>
-        <input type="number" id="param1" name="param1" step="0.1" value="1.0" required><br><br>
 
-        <label for="param2">a2:</label>
-        <input type="number" id="param2" name="param2" step="0.1" value="0.2" required><br><br>
+    <div class="equation-select-wrapper">
+        <h1>Differential equation solver <br> with in-context operator networks</h1>
+        <label for="equation-select">Select Equation Type:</label>
+        <select id="equation-select">
+            <option value="ode-auto-const">ODE Constant</option>
+            <option value="ode-auto-linear1">ODE Linear 1</option>
+            <option value="ode-auto-linear2">ODE Linear 2</option>
+            <option value="series-damped-oscillator">Damped oscillator</option>
+            <option value="pde-poisson-spatial">Poisson's equation</option>
+            <option value="pde-porous-spatial">Linear reaction-diffusion</option>
+            <option value="pde-cubic-spatial">Nonlinear reaction-diffusion</option>
+        </select>
+    </div>
 
-        <label for="init">Initial condition u(0):</label>
-        <input type="number" id="init" name="init" step="0.1" value="0.0" required><br><br>
+    <div id="ode-auto-const-form" class="equation-form" style="display: none;">
+        <h2>ODE  Constant Solver</h2>
+        <h4>Equation: \(u'(t) = a_1 \cdot c(t) + a_2\)</h4>
+        <form id="ode-auto-const-solver">
+            <label for="param1">\(a_1 \in [0.5, 1.5]\):</label>
+            <input type="number" id="param1" name="param1" step="0.01" value="1.0" required><br><br>
 
-        <label for="control">Control function c(t) (comma-separated values):</label>
-        <input type="text" id="control" name="control" value="0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9" required><br><br>
+            <label for="param2">\(a_2 \in [-1, 1]\):</label>
+            <input type="number" id="param2" name="param2" step="0.01" value="0.2" required><br><br>
 
-        <label for="demos">Number of demos:</label>
-        <input type="number" id="demos" name="demos" min="1" value="3" required><br><br>
+            <label for="init1">Initial condition \(u(0)\):</label>
+            <input type="number" id="init1" name="init1" step="0.01" value="0.0" required><br><br>
 
-        <input type="submit" value="Solve">
-    </form>
+            <label for="control">Control function \(c(t)\) (e.g., t/2, sin(t), t^2):</label>
+            <input type="text" id="control" name="control" value="t/2" required><br><br>
 
-    <canvas id="result-chart" width="400" height="200"></canvas>
+            <label for="demos">Number of demos (1-5):</label>
+            <input type="number" id="demos" name="demos" min="1" value="3" required><br><br>
+
+            <input type="submit" value="Solve">
+        </form>
+    </div>
+
+    <div id="ode-auto-linear1-form" class="equation-form" style="display: none;">
+        <h2>ODE Linear 1 Solver</h2>
+        <h4>Equation: \(u'(t) = a_1 \cdot c(t) \cdot u(t) + a_2\)</h4>
+        <form id="ode-auto-linear1-solver">
+            <label for="param1">\(a_1 \in [0.5, 1.5]\):</label>
+            <input type="number" id="param1" name="param1" step="0.01" value="1.0" required><br><br>
+
+            <label for="param2">\(a_2 \in [-1, 1]\):</label>
+            <input type="number" id="param2" name="param2" step="0.01" value="0.2" required><br><br>
+
+            <label for="init1">Initial condition \(u(0)\):</label>
+            <input type="number" id="init1" name="init1" step="0.01" value="0.0" required><br><br>
+
+            <label for="control">Control function \(c(t)\) (e.g., t/2, sin(t), t^2):</label>
+            <input type="text" id="control" name="control" value="t/2" required><br><br>
+
+            <label for="demos">Number of demos (1-5):</label>
+            <input type="number" id="demos" name="demos" min="1" value="3" required><br><br>
+
+            <input type="submit" value="Solve">
+        </form>
+    </div>
+
+    <div id="ode-auto-linear2-form" class="equation-form" style="display: none;">
+        <h2>ODE Linear 2 Solver</h2>
+        <h4>Equation: \(u'(t) = a_1 \cdot u(t) + a_2 \cdot c(t) + a_3\)</h4>
+        <form id="ode-auto-linear2-solver">
+            <label for="param1">\(a_1 \in [-1, 1]\):</label>
+            <input type="number" id="param1" name="param1" step="0.01" value="1.0" required><br><br>
+
+            <label for="param2">\(a_2 \in [0.5, 1.5]\):</label>
+            <input type="number" id="param2" name="param2" step="0.01" value="0.7" required><br><br>
+
+            <label for="param3">\(a_3 \in [-1, 1]\):</label>
+            <input type="number" id="param3" name="param3" step="0.01" value="0.0" required><br><br>
+
+            <label for="init1">Initial condition \(u(0)\):</label>
+            <input type="number" id="init1" name="init1" step="0.01" value="0.0" required><br><br>
+
+            <label for="control">Control function \(c(t)\) (e.g., t/2, sin(t), t^2):</label>
+            <input type="text" id="control" name="control" value="t/2" required><br><br>
+
+            <label for="demos">Number of demos (1-5):</label>
+            <input type="number" id="demos" name="demos" min="1" value="3" required><br><br>
+
+            <input type="submit" value="Solve">
+        </form>
+    </div>
+
+    <div id="series-damped-oscillator-form" class="equation-form" style="display: none;">
+        <h2>Damped Oscillator Solver</h2>
+        <h4>Equation: \(u(t) = A \text{sin}(\frac{2 \pi}{T} t + \eta ) e^{kt}\)</h4>
+        <form id="series_damped_oscillator-solver">
+            <label for="param1">Decay \( k \in [0,2]\):</label>
+            <input type="number" id="param1" name="param1" step="0.01" value="1.0" required><br><br>
+
+            <label for="amp">Amplitude \(A \in [0.5, 1.5]\):</label>
+            <input type="number" id="amp" name="amp" step="0.01" value="0.5" required><br><br>
+
+            <label for="period">Period \(T \in [0.1, 0.2]\):</label>
+            <input type="number" id="period" name="period" step="0.01" value="0.15" required><br><br>
+
+            <label for="phase">Phase shift \(\eta \in [0, 2 \pi]\):</label>
+            <input type="number" id="phase" name="phase" step="0.01" value="0.15" required><br><br>
+
+            <label for="demos">Number of demos (1-5):</label>
+            <input type="number" id="demos" name="demos" min="1" value="3" required><br><br>
+
+            <input type="submit" value="Solve">
+        </form>
+    </div>
+
+    <div id="pde-poisson-spatial-form" class="equation-form" style="display: none;">
+        <h2>Poisson's equation</h2>
+            <h4>Equation: \(u''(t) = c(t)\)</h4>
+            <form id="pde-poisson-spatial-solver">
+                <label for="init1">Initial condition \(u(0) \in [-1, 1]\):</label>
+                <input type="number" id="init1" name="init1" step="0.01" value="1.0" required><br><br>
+    
+                <label for="init2">Final condition \(u(1) \in [0.5, 1.5]\):</label>
+                <input type="number" id="init2" name="init2" step="0.01" value="0.2" required><br><br>
+    
+                <label for="control">Control function \(c(t)\) (e.g., t/2, sin(t), t^2):</label>
+                <input type="text" id="control" name="control" value="t/2" required><br><br>
+    
+                <label for="demos">Number of demos (1-5):</label>
+                <input type="number" id="demos" name="demos" min="1" value="3" required><br><br>
+    
+                <input type="submit" value="Solve">
+            </form>
+    </div>
+
+    <div id="pde-porous-spatial-form" class="equation-form" style="display: none;">
+        <h2>Linear reaction-diffusion equation</h2>
+            <h4>Equation: \(-\lambda a u''(x) + k(x) u(x) = c, \lambda = 0.05\)</h4>
+            <form id="pde-porous-spatial-solver">
+                <label for="init1">Initial condition \(u(0) \in [0, 1]\)</label>
+                <input type="number" id="init1" name="init1" step="0.01" value="0.5" required><br><br>
+
+                <label for="init2">Final condition \(u(1) \in [0, 1]\)</label>
+                <input type="number" id="init2" name="init2" step="0.01" value="0.5" required><br><br>
+
+                <label for="constant">Constant \(c \in [-2, 2]\)</label>
+                <input type="number" id="constant" name="constant" step="0.01" value="0.5" required><br><br>
+
+                <label for="control">Control \(k(x)\) (e.g., x/2, sin(x), x^2):</label>
+                <input type="text" id="control" name="control" value="x/2" required><br><br>
+
+                <label for="param1">Diffusion coefficient \(a \in [0.5, 1.5]\)</label>
+                <input type="number" id="param1" name="param1" step="0.01" value="0.5" required><br><br>
+
+                <label for="demos">Number of demos (1-5):</label>
+                <input type="number" id="demos" name="demos" min="1" value="3" required><br><br>
+    
+                <input type="submit" value="Solve">
+            </form>
+    </div>
+
+    <div id="pde-cubic-spatial-form" class="equation-form" style="display: none;">
+        <h2>Nonlinear reaction-diffusion equation</h2>
+        <h4>Equation: \(-\lambda a u''(x) + ku^3 = c(x)\)</h4>
+        <form id="pde-porous-spatial-solver">
+            <label for="init1">Initial condition \(u(0) \in [0, 1]\)</label>
+            <input type="number" id="init1" name="init1" step="0.01" value="0.5" required><br><br>
+
+            <label for="init2">Final condition \(u(1) \in [0, 1]\)</label>
+            <input type="number" id="init2" name="init2" step="0.01" value="0.5" required><br><br>
+
+            <label for="constant">Constant \(k \in [0.5, 1.5]\)</label>
+            <input type="number" id="constant" name="constant" step="0.01" value="0.5" required><br><br>
+
+            <label for="control">Control \(k(x)\) (e.g., x/2, sin(x), x^2):</label>
+            <input type="text" id="control" name="control" value="x/2" required><br><br>
+
+            <label for="param1">Diffusion coefficient \(a \in [0.5, 1.5]\)</label>
+            <input type="number" id="param1" name="param1" step="0.01" value="0.5" required><br><br>
+
+            <label for="demos">Number of demos (1-5):</label>
+            <input type="number" id="demos" name="demos" min="1" value="3" required><br><br>
+
+            <input type="submit" value="Solve">
+        </form>
+    </div>
+
+    <canvas id="result-chart" width="150" height="75"></canvas>
 
     <script>
         $(document).ready(function() {
             let chart = null;
 
-            $('#ode-form').submit(function(e) {
-                e.preventDefault();
+            function showSelectedForm() {
+                const selectedValue = $('#equation-select').val();
+                $('.equation-form').hide();
+                $('#result-chart').show();
+                if (selectedValue) {
+                    $(`#${selectedValue}-form`).show();
+                }
+            }
+
+            // Call the function when the page loads
+            showSelectedForm();
+
+            $('#equation-select').change(showSelectedForm);
+
+            function evaluateExpression(expression, t) {
+                // Replace 'x' with the actual value
+                let expr = expression.replace(/t/g, t);
                 
-                const formData = {
-                    param1: $('#param1').val(),
-                    param2: $('#param2').val(),
-                    init: $('#init').val(),
-                    control: $('#control').val(),
-                    demos: $('#demos').val()
-                };
+                // Define mathematical functions
+                const sin = Math.sin;
+                const cos = Math.cos;
+                const tan = Math.tan;
+                const exp = Math.exp;
+                const log = Math.log;
+                const sqrt = Math.sqrt;
+                const pow = Math.pow;
+                
+                // Evaluate the expression
+                return eval(expr);
+            }
+
+            function generateControlValues(expression) {
+                const domain = [];
+                const values = [];
+                for (let i = 0; i < 50; i++) {
+                    let t = i * 0.02;
+                    domain.push(t);
+                    values.push(evaluateExpression(expression, t));
+                }
+                return { domain, values };
+            }
+
+            $('.equation-form').on('submit', 'form', function(e) {
+                e.preventDefault();
+
+                const controlExpression = $(this).find('#control').val();
+                const { domain, values } = generateControlValues(controlExpression);
+                
+                const possibleVariables = ['init1', 'init2', 'constant', 'control', 'param1', 'param2', 'param3', 'amp', 'period', 'phase', 'demos'];
+
+                const formData = {};
+
+                possibleVariables.forEach(variable => {
+                    const input = $(this).find(`#${variable}`);
+                    if (input.length > 0) {
+                        formData[variable] = input.val();
+                    }
+                });
+
+                // Add other necessary fields
+                formData.domain = domain;
+                formData.equationType = $('#equation-select').val();
+
+                // Handle 'control' separately if it's still an array
+                if (typeof values !== 'undefined' && Array.isArray(values)) {
+                    formData.control = values.join(',');
+                }
+
+                console.log(formData);
 
                 $.ajax({
                     url: '/solve',

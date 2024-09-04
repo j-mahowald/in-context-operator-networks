@@ -20,7 +20,6 @@ import data_preparation.data_pdes as pdes
 import data_preparation.data_series as series   
 print("Devices: ", jax.devices())
 
-jax.clear_backends()
 jax.config.update('jax_platform_name', 'cpu')
 
 seed = 1
@@ -61,7 +60,6 @@ def parse_equation(equation_dict):
 
         all_ts = []; all_cs = []; all_us = []; all_params = []; all_eqn_captions = []
         quest_control = control[None, ...]
-
         ts_expand, control, traj = dyn.generate_one_dyn(key = next(rng), ode_batch_fn = ode_batch_fn, 
                                                 dt = 1.0/domain.shape[1], length = domain.shape[1], num = demo_num,
                                                 k_sigma = 1.0, k_l = 0.5, init_range = (-1,1),
@@ -71,6 +69,9 @@ def parse_equation(equation_dict):
                                                 dt = 1.0/domain.shape[1], length = domain.shape[1], num = 1,
                                                 k_sigma = 1.0, k_l = 0.5, init_range = (-1,1),
                                                 coeffs = parameters, control = quest_control, init = jnp.array(init))
+        print("Control: ", quest_control)
+        print("Generated solution: ", quest_traj)
+
         ts_expand = jnp.concatenate([ts_expand, quest_ts_expand], axis=0)
         control = jnp.concatenate([control, quest_control], axis=0)
         traj = jnp.concatenate([traj, quest_traj], axis=0)
@@ -297,96 +298,32 @@ def run_inference(raw, equation, caption, data, label, model_config, test_config
     prediction = runner.get_pred(data_replicated, with_caption=False)
     return prediction
 
-
 def solve_differential_equation(equation_dict):
     demo_num, equation_type = parse_equation(equation_dict)
     raw, equation, caption, data, label, model_config, test_config = prepare_model_input(demo_num, equation_type)
     prediction = run_inference(raw, equation, caption, data, label, model_config, test_config)
-
+    os.remove('data/interactive_{}_forward.tfrecord'.format(equation_type.rsplit("_", 1)[0]))
     return prediction[0,0,:,0]
 
-# domain: x in [0, 1]
-# params in [-1, 1]
-ode_domain = jnp.linspace(0, 1, 50, endpoint=False)
-ode_auto_const = { # example: u'(t) = 1.0c(t) + 0.2
-    'equation_type': 'ode_auto_const_forward',
-    'domain': ode_domain,
-    'parameters': [1.0, 0.2],
-    'conditions': {
-        'init': [0.0],
-        'control': jnp.sin(ode_domain) 
-    },
-    'demos': 3
-}
-ode_auto_linear1 = { # example: u'(t) = 0.7*c(t)*u(t) - 0.3
-    'equation_type': 'ode_auto_linear1_forward',
-    'domain': ode_domain,
-    'parameters': [0.7, -0.3],
-    'conditions': {
-        'init': [0.0],
-        'control': 1/2 * ode_domain
-    },
-    'demos': 3
-} 
-ode_auto_linear2 = { # example: u'(t) = 0.5*u(t) + 0.25*c(t) - 0.3
-    'equation_type': 'ode_auto_linear2_forward',
-    'domain': ode_domain,
-    'parameters': [0.5, 0.25, -0.3],
-    'conditions': {
-        'init': [0.0],
-        'control': 1/2 * ode_domain 
-    },
-    'demos': 3
-}
-series_damped_oscillator = { # example: u(t) = Asin((2pi/T)t + eta)*e^(0.75t)
-    'equation_type': 'series_damped_oscillator_forward',
-    'domain': jnp.linspace(0, 0.5, 101), # refers to the first half of the domain on which information is provided
-    'parameters': [0.75], # decay coefficient
-    'conditions': {
-        'init': [1.0, 0.15, jnp.pi], #A, T, and eta counted as initial conditions for consistency
-        'control': []
-    },
-    'demos': 4
-}
-pde_poisson_spatial = { # example: u''(x) = c(x)
-    'equation_type': 'pde_poisson_spatial_forward',
-    'domain': jnp.linspace(0.0, 1.0, 100, endpoint=False),
-    'parameters': [],
-    'conditions': {
-        'init': [0.0, 0.5], # [u_l, u_r]
-        'control': 1/2 * jnp.linspace(0.0, 1.0, 100, endpoint=False) 
-    },
-    'demos': 3
-}
-pde_porous_spatial = { # example: -λau''(x)+k(x)u(x)=c
-    'equation_type': 'pde_porous_spatial_forward',
-    'domain': jnp.linspace(0.0, 1.0, 101, endpoint=True),
-    'parameters': [0.0, 0.0, -0.25, 1.0], #[u_0, u_1, c, a]
-    'conditions': {
-        'control': 1/2 * jnp.linspace(0.0, 1.0, 101, endpoint=True),
-        'init': [] # init already covered in parameters
-    },
-    'demos': 5
-}
-pde_cubic_spatial = { # example: -λau''(x)+ku^3 = c(x)
-    'equation_type': 'pde_cubic_spatial_forward',
-    # 'domain': jnp.linspace(0.0, 1.0, 101, endpoint=True),
-    'parameters': [0.0, 1.0, 1.0, 1.0], #[u_0, u_1, a, k]
-    'conditions': {
-        'control': 1/2 * jnp.linspace(0.0, 1.0, 101, endpoint=True),
-        'init': [] #  init already covered in parameters
-    },
-    'demos': 3
-}
-
 def main(argv):
-#   for key, value in FLAGS.__flags.items():
-    # print(value.name, ": ", value._value, flush=True)
+    for key, value in FLAGS.__flags.items():
+        print(value.name, ": ", value._value, flush=True)
 
-  utils.set_seed(FLAGS.seed + 123456) 
-  prediction = solve_differential_equation(ode_auto_linear2)
-  print(prediction)
-  print("Shape: ", prediction.shape)
+    ode_domain = jnp.linspace(0, 1, 50, endpoint=False)
+    ode_domain = jnp.array(ode_domain)
+    rounded_ode_domain = jnp.array([float(f'{x:.2g}') for x in ode_domain])
+
+    equation_dict = {'equation_type': 'ode_auto_const_forward',
+                    'domain': rounded_ode_domain,
+                    'parameters': [float(1.0), float(0.2)],
+                    'conditions': {'init': [float(0.0)],
+                                    'control': jnp.linspace(0, 1, 50, endpoint=False)},
+                    'demos': int(3)}
+    utils.set_seed(FLAGS.seed + 123456) 
+    prediction = solve_differential_equation(equation_dict)
+    print("Prediction on equation dict")
+    print(prediction)
+    print("Shape: ", prediction.shape)  
 
 if __name__ == '__main__':
     FLAGS = flags.FLAGS

@@ -5,7 +5,7 @@ import os
 os.environ['JAX_PLATFORMS'] = 'cpu'
 
 # Import the necessary functions from interactive.py
-from interactive import solve_differential_equation, ode_auto_const
+from interactive import solve_differential_equation
 
 flask_app = Flask(__name__)
 
@@ -33,22 +33,81 @@ def index():
 @flask_app.route('/solve', methods=['POST'])
 def solve():
     data = request.json
-    
+
+    ode_domain = jnp.linspace(0, 1, 50, endpoint=False)
+    ode_domain = jnp.array(ode_domain)
+    rounded_ode_domain = jnp.array([float(f'{x:.2g}') for x in ode_domain])
+
     # Update the ode_auto_const dictionary with user input
-    ode_auto_const['parameters'] = [float(data['param1']), float(data['param2'])]
-    ode_auto_const['conditions']['init'] = [float(data['init'])]
-    ode_auto_const['conditions']['control'] = jnp.array([float(x) for x in data['control'].split(',')])
-    ode_auto_const['demos'] = int(data['demos'])
+    # domain imported from interactive (for now)
+    if data['equationType'] == 'ode-auto-const':
+        equation_dict = {'equation_type': 'ode_auto_const_forward',
+                          'domain': rounded_ode_domain,
+                          'parameters': [float(data['param1']), float(data['param2'])],
+                          'conditions': {'init': [float(data['init1'])],
+                                         'control': jnp.array([float(x) for x in data['control'].split(',')])},
+                          'demos': int(data['demos'])}
+
+    if data['equationType'] == 'ode-auto-linear1':
+        equation_dict = {'equation_type': 'ode_auto_linear1_forward',
+                            'domain': rounded_ode_domain,
+                            'parameters': [float(data['param1']), float(data['param2'])],
+                            'conditions': {'init': [float(data['init1'])],
+                                           'control': jnp.array([float(x) for x in data['control'].split(',')])},
+                            'demos': int(data['demos'])}
+
+    if data['equationType'] == 'ode-auto-linear2':
+        equation_dict = {'equation_type': 'ode_auto_linear2_forward',
+                            'domain': rounded_ode_domain,
+                            'parameters': [float(data['param1']), float(data['param2']), float(data['param3'])],
+                            'conditions': {'init': [float(data['init1'])],
+                                           'control': jnp.array([float(x) for x in data['control'].split(',')])},
+                            'demos': int(data['demos'])}
+
+    if data['equationType'] == 'series-damped-oscillator':
+        equation_dict = {'equation_type': 'series_damped_oscillator_forward',
+                            'domain': jnp.linspace(0, 0.5, 101),
+                            'parameters': [float(data['param1'])],
+                            'conditions': {'init': [float(data['amp']), float(data['period']), float(data['phase'])],
+                                            'control': []},
+                            'demos': int(data['demos'])}
+
+
+    if data['equationType'] == 'pde-poisson-spatial':
+        equation_dict = {'equation_type': 'pde_poisson_spatial_forward',
+                               'domain': jnp.linspace(0.0, 1.0, 100, endpoint=False),
+                               'parameters': [],
+                               'conditions': {'init': [float(data['init1']), float(data['init2'])],
+                                              'control': data['control']},
+                               'demos': int(data['demos'])}
+
+    if data['equationType'] == 'pde-porous-spatial':
+        equation_dict = {'equation_type': 'pde_porous_spatial_forward',
+                              'domain': jnp.linspace(0.0, 1.0, 101, endpoint=True),
+                              'parameters': [float(data['init1']), float(data['init2']), float(data['constant']), float(data['param1'])],
+                              'conditions': {'init': [],
+                                             'control': data['control']},
+                              'demos': int(data['demos'])}
+        
+
+    if data['equationType'] == 'pde-cubic-spatial':
+        equation_dict = {'equation_type': 'pde_cubic_spatial',
+                            'domain': jnp.linspace(0.0, 1.0, 101, endpoint=True),
+                            'parameters': [float(data['init1']), float(data['init2']), float(data['param1']), float(data['constant'])],
+                            'conditions': {'init': [],
+                                           'control': data['control']},
+                            'demos': int(data['demos'])}
+
 
     # Solve the differential equation
-    prediction = solve_differential_equation(ode_auto_const)
+    prediction = solve_differential_equation(equation_dict)
 
     # Convert the prediction to a list for JSON serialization
     prediction_list = prediction.tolist()
 
     return jsonify({
         'prediction': prediction_list,
-        'domain': ode_auto_const['domain'].tolist()
+        'domain': equation_dict['domain'].tolist()
     })
 
 def main(argv):

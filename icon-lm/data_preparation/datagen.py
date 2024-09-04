@@ -56,7 +56,7 @@ def generate_ode_auto_linear1(seed, eqns, quests, length, dt, num, caption_mode,
 
   all_ts = []; all_cs = []; all_us = []; all_params = []; all_eqn_captions = []
   for i, (coeff_a, coeff_b) in enumerate(zip(coeffs_a, coeffs_b)): 
-    for j in range(quests):   
+    for j in range(quests):
       ts_expand, control, traj = dyn.generate_one_dyn(key = next(rng), ode_batch_fn = dyn.ode_auto_linear1_batch_fn, 
                                                       dt = dt, length = length, num = num,
                                                       k_sigma = 1.0, k_l = 0.5, init_range = (-1,1),

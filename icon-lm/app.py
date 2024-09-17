@@ -66,7 +66,7 @@ def solve():
 
     if data['equationType'] == 'series-damped-oscillator':
         equation_dict = {'equation_type': 'series_damped_oscillator_forward',
-                            'domain': jnp.linspace(0, 0.5, 101),
+                            'domain': jnp.array([float(f'{x:.2g}') for x in jnp.linspace(0, 0.5, 101)]),
                             'parameters': [float(data['param1'])],
                             'conditions': {'init': [float(data['amp']), float(data['period']), float(data['phase'])],
                                             'control': []},
@@ -75,27 +75,27 @@ def solve():
 
     if data['equationType'] == 'pde-poisson-spatial':
         equation_dict = {'equation_type': 'pde_poisson_spatial_forward',
-                               'domain': jnp.linspace(0.0, 1.0, 100, endpoint=False),
+                               'domain': jnp.array([float(f'{x:.2g}') for x in jnp.linspace(0.0, 1.0, 101, endpoint=True)]),
                                'parameters': [],
                                'conditions': {'init': [float(data['init1']), float(data['init2'])],
-                                              'control': data['control']},
+                                              'control': jnp.array([float(x) for x in data['control'].split(',')])},
                                'demos': int(data['demos'])}
 
     if data['equationType'] == 'pde-porous-spatial':
         equation_dict = {'equation_type': 'pde_porous_spatial_forward',
-                              'domain': jnp.linspace(0.0, 1.0, 101, endpoint=True),
+                              'domain': jnp.array([float(f'{x:.2g}') for x in jnp.linspace(0.0, 1.0, 101, endpoint=True)]), 
                               'parameters': [float(data['init1']), float(data['init2']), float(data['constant']), float(data['param1'])],
                               'conditions': {'init': [],
-                                             'control': data['control']},
+                                             'control': jnp.array([float(x) for x in data['control'].split(',')])},
                               'demos': int(data['demos'])}
         
 
     if data['equationType'] == 'pde-cubic-spatial':
         equation_dict = {'equation_type': 'pde_cubic_spatial',
-                            'domain': jnp.linspace(0.0, 1.0, 101, endpoint=True),
+                            'domain': jnp.array([float(f'{x:.2g}') for x in jnp.linspace(0.0, 1.0, 101, endpoint=True)]),
                             'parameters': [float(data['init1']), float(data['init2']), float(data['param1']), float(data['constant'])],
                             'conditions': {'init': [],
-                                           'control': data['control']},
+                                           'control': jnp.array([float(x) for x in data['control'].split(',')])},
                             'demos': int(data['demos'])}
 
 

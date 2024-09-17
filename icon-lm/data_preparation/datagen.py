@@ -134,7 +134,7 @@ def generate_damped_oscillator(seed, eqns, quests, length, dt, num, caption_mode
 
 def generate_pde_poisson(seed, eqns, quests, length, dx, num, caption_mode, name):
   '''
-  du/dxx = c(x) over domain [0,L]
+  d^2u/dx^2 = c(x) over domain [0,L]
   c(x) : spatially varying coefficient, size N-1,
           we use GP to sample c(x)
   u_left, u_right: boundary conditions. 
@@ -148,7 +148,7 @@ def generate_pde_poisson(seed, eqns, quests, length, dx, num, caption_mode, name
   all_xs = []; all_cs = []; all_us = []; all_params = []; all_eqn_captions = []
   for i, (coeff_ul, coeff_ur) in enumerate(zip(coeffs_ul, coeffs_ur)):
     for j in range(quests):
-      xs = jnp.linspace(0.0, 1.0, N+1)# (N+1,)
+      xs = jnp.linspace(0.0, 1.0, N+1) # (N+1,)
       cs = dutils.generate_gaussian_process(next(rng), xs, num, kernel = dutils.rbf_kernel_jax, k_sigma = 2.0, k_l = 0.5) # (num, N+1)
       us = pdes.solve_poisson_batch(L, N, coeff_ul, coeff_ur, cs[:,1:-1]) # (num, N+1)
       all_xs.append(einshape("i->jik", xs, j = num, k = 1)) # (num, N+1, 1)

@@ -136,7 +136,6 @@ def parse_equation(equation_dict):
         control = control[None, ...]
         quest_us = pdes.solve_poisson_batch(L, N, init[0], init[1], control[:,1:-1])
 
-        print("Sol'ns :", quest_us[None, None, ...])
 
         cs = jnp.concatenate([cs, control], axis=0)
         us = jnp.concatenate([us, quest_us], axis=0) 
@@ -234,6 +233,9 @@ def prepare_model_input(demo_num, equation_type):
     pprint(test_file_names)
 
     test_config = utils.load_json("config_data/test_lm_interactive_config.json")
+
+    if 'ode' in equation_type:
+        test_config['quest_qoi_len'] = 50
 
     # Updating all demo_nums in config based on user-provided demo_num
     def update_demo_nums(config, new_demo_num):

@@ -168,7 +168,7 @@
                 <input type="number" id="init1" name="init1" step="0.01" value="1.0" required><br><br>
     
                 <label for="init2">Final condition \(u(1) \in [0.5, 1.5]\):</label>
-                <input type="number" id="init2" name="init2" step="0.01" value="0.2" required><br><br>
+                <input type="number" id="init2" name="init2" step="0.01" value="0.7" required><br><br>
     
                 <label for="control">Control function \(c(t)\) (e.g., t/2, sin(t), t^2):</label>
                 <input type="text" id="control" name="control" value="t/2" required><br><br>
@@ -184,10 +184,10 @@
         <h2>Linear reaction-diffusion equation</h2>
             <h4>Equation: \(-\lambda a u''(x) + k(x) u(x) = c, \lambda = 0.05\)</h4>
             <form id="pde-porous-spatial-solver">
-                <label for="init1">Initial condition \(u(0) \in [0, 1]\)</label>
+                <label for="init1">Initial condition \(u(0) \in [-1, 1]\)</label>
                 <input type="number" id="init1" name="init1" step="0.01" value="0.5" required><br><br>
 
-                <label for="init2">Final condition \(u(1) \in [0, 1]\)</label>
+                <label for="init2">Final condition \(u(1) \in [-1, 1]\)</label>
                 <input type="number" id="init2" name="init2" step="0.01" value="0.5" required><br><br>
 
                 <label for="constant">Constant \(c \in [-2, 2]\)</label>
@@ -253,8 +253,7 @@
             $('#equation-select').change(showSelectedForm);
 
             function evaluateExpression(expression, t) {
-                // Replace 'x' with the actual value
-                let expr = expression.replace(/t/g, t);
+                let expr = expression.replace(/[tx]/g, t);
                 
                 // Define mathematical functions
                 const sin = Math.sin;
@@ -269,11 +268,25 @@
                 return eval(expr);
             }
 
-            function generateControlValues(expression) {
+            function generateControlValues(expression, equationType) {
                 const domain = [];
                 const values = [];
-                for (let i = 0; i < 50; i++) {
-                    let t = i * 0.02;
+                let numPoints, step;
+
+                if (equationType.includes('ode')) {
+                    numPoints = 50;
+                    step = 0.02;
+                } else if (['poisson', 'porous', 'cubic'].some(type => equationType.includes(type))) {
+                    numPoints = 101;
+                    step = 0.01;
+                } else {
+                    // Default case, you might want to handle this differently
+                    numPoints = 50;
+                    step = 0.02;
+                }
+
+                for (let i = 0; i < numPoints; i++) {
+                    let t = i * step;
                     domain.push(t);
                     values.push(evaluateExpression(expression, t));
                 }
@@ -283,8 +296,11 @@
             $('.equation-form').on('submit', 'form', function(e) {
                 e.preventDefault();
 
+                const equationType = $('#equation-select').val();
                 const controlExpression = $(this).find('#control').val();
-                const { domain, values } = generateControlValues(controlExpression);
+                const { domain, values } = generateControlValues(controlExpression, equationType);
+
+                // ... rest of your code ...
                 
                 const possibleVariables = ['init1', 'init2', 'constant', 'control', 'param1', 'param2', 'param3', 'amp', 'period', 'phase', 'demos'];
 

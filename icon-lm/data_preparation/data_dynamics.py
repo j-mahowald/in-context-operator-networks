@@ -3,7 +3,7 @@ config = jax.config
 import jax.numpy as jnp
 from collections import namedtuple
 from functools import partial
-import data_utils
+import data_preparation.data_utils as data_utils
 from einshape import jax_einshape as einshape
 
 

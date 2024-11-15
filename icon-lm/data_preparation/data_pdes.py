@@ -3,7 +3,7 @@ from functools import partial
 from einshape import jax_einshape as einshape
 from collections import namedtuple
 import jax
-import data_utils as dutils 
+import data_preparation.data_utils as dutils 
 jax.config.update("jax_enable_x64", True)
 
 

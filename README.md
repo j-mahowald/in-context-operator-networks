@@ -27,7 +27,7 @@ Moreover, we introduce a novel approach, namely "ICON-LM", to train a language-m
 By bridging language models with operator learning and data-driven differential equation solvers, we have not only achieved substantial advancements in this specific domain, but also opened up a new avenue for the application of language models in scientific machine learning, a realm that remains largely under-explored.
 
 See the paper for more details:
-https://arxiv.org/pdf/2308.05061.pdf. Code are in folder `icon-lm/`. See more details in `icon-lm/README.md`.
+https://arxiv.org/pdf/2308.05061.pdf. Code are in folder `icon_lm/`. See more details in `icon_lm/README.md`.
 
 ## PDE Generalization of In-Context Operator Networks: A Study on 1D Scalar Nonlinear Conservation Laws
 
@@ -36,7 +36,7 @@ In this paper, we present a detailed methodology for solving PDE problems with I
 We show the positive evidence that ICON can generalize well to PDEs with new forms without any fine-tuning. In particular, an ICON model trained on conservation laws with cubic flux functions can generalize well to some other flux functions of more general forms, without fine-tuning.
 
 See the paper for more details:
-https://arxiv.org/pdf/2401.07364.pdf. Code are in folder `icon-lm/`. See more details in `icon-lm/README.md`.
+https://arxiv.org/pdf/2401.07364.pdf. Code are in folder `icon_lm/`. See more details in `icon_lm/README.md`.
 
 ## Reference:
 ```

@@ -9,4 +9,4 @@ useless/*
 **/*tfrecord
 **/*pdf
 **/*png
-icon-lm/analysis/**/result_dict.pkl
+icon_lm/analysis/**/result_dict.pkl

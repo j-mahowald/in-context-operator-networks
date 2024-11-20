@@ -38,4 +38,28 @@ domain: $\Omega = (L+1) \cdot dx; L=100, dt=0.01 \implies \Omega = [0, 0.01, 0.0
 </br>
 $u(0), u(1) \in [-1,1], a \in [0.5, 1.5], k \in [0.5, 1.5]$
 </br>
-domain: $\Omega = (L+1) \cdot dx; L=100, dt=0.01 \implies \Omega = [0, 0.01, 0.02, ..., 1.00], \Omega_{cond} = \Omega_{QoI}$
+domain: $\Omega = (L+1) \cdot dx; L=100, dt=0.0x \implies \Omega = [0, 0.01, 0.02, ..., 1.00], \Omega_{cond} = \Omega_{QoI}$
+
+`pde_heat_homog`: $u_t(x,t) = k \cdot u_{xx}(x,t), x \in [0,L], t>0$
+</br>
+$u(0,t), u(L,t) \in [-1,1], k \in [0.001,0.01]$
+</br>
+domain: $\Omega = L_x \cdot dx \times L_t \cdot dt, L_x=L_t=1, dx=dt=0.02 \implies 
+\Omega =  \begin{bmatrix}
+(0.00,0.00) & (0.00,0.02) & \cdots & (0.00,1.00) \\
+(0.02,0.00) & (0.02,0.02) & \cdots & (0.02,1.00) \\
+\vdots & \vdots & \ddots & \vdots \\
+(1.00,0.00) & (1.00,0.02) & \cdots & (1.00,1.00)
+\end{bmatrix}$
+
+`pde_heat_nonhomog`: $u_t(x,t)=k \cdot u_{xx}(x,t) + \alpha u, x \in [0,L], t>0$
+</br>
+$u(0,t), u(L,t) \in [-1,1], k \in [0.001,0.01]$
+</br>
+domain: $\Omega = L_x \cdot dx \times L_t \cdot dt, L_x=L_t=1, dx=dt=0.02 \implies 
+\Omega =  \begin{bmatrix}
+(0.00,0.00) & (0.00,0.02) & \cdots & (0.00,1.00) \\
+(0.02,0.00) & (0.02,0.02) & \cdots & (0.02,1.00) \\
+\vdots & \vdots & \ddots & \vdots \\
+(1.00,0.00) & (1.00,0.02) & \cdots & (1.00,1.00)
+\end{bmatrix}$

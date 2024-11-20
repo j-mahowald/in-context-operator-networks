@@ -426,25 +426,50 @@ confidence=HIGH,
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable=raw-checker-failed,
-      bad-inline-option,
-      locally-disabled,
-      file-ignored,
-      suppressed-message,
-      useless-suppression,
-      deprecated-pragma,
-      use-symbolic-message-instead,
-      use-implicit-booleaness-not-comparison-to-string,
-      use-implicit-booleaness-not-comparison-to-zero,
-      line-too-long,
-      unused-argument, unused-import,
-      broad-exception-raised,
-      pointless-string-statement,
-      too-many-arguments, too-many-locals,
-      multiple-statements,
-      redefined-outer-name,
-      invalid-name
-        
+disable=
+     # Code Style/Formatting
+     line-too-long,
+     multiple-statements, 
+     invalid-name,
+     wrong-import-order,
+     wrong-import-position,
+     unnecessary-lambda,
+     
+     # Import Related
+     unused-import,
+     import-outside-toplevel,
+     import-error,
+     protected-access,
+     
+     # Code Complexity
+     too-many-arguments,
+     too-many-locals,
+     too-many-branches,
+     
+     # Variable Usage
+     unused-argument,
+     unused-variable,
+     redefined-outer-name,
+     
+     # Exception Handling
+     broad-exception-raised,
+     broad-exception-caught,
+     
+     # Pylint Configuration
+     bad-inline-option,
+     locally-disabled,
+     file-ignored,
+     suppressed-message,
+     useless-suppression,
+     deprecated-pragma,
+     use-symbolic-message-instead,
+     
+     # Boolean Comparisons
+     use-implicit-booleaness-not-comparison-to-string,
+     use-implicit-booleaness-not-comparison-to-zero,
+     
+     # Documentation
+     pointless-string-statement
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

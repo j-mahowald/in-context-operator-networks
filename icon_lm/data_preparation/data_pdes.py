@@ -1,19 +1,19 @@
+import jax
 import jax.numpy as jnp
 from functools import partial
 from einshape import jax_einshape as einshape
 from collections import namedtuple
-import jax
-import data_utils as dutils 
+import data_utils as dutils
 jax.config.update("jax_enable_x64", True)
 
 
-@partial(jax.jit, static_argnames=("N"))
+@partial(jax.jit, static_argnames="N")
 def solve_poisson(L, N, u_left, u_right, c):
 	'''
 	du/dxx = c over domain [0,L]
 	c: spatially varying function, size N-1,
-	u_left, u_right: boundary conditions. 
-	the output is the full solution, (N+1) grid point values.  
+	u_left, u_right: boundary conditions.
+	the output is the full solution, (N+1) grid point values.
 	'''
 	dx = L / N
 	# x = jnp.linspace(0, L, N+1)
@@ -31,15 +31,15 @@ def solve_poisson(L, N, u_left, u_right, c):
 	u = jnp.pad(out_u, (1, 1), mode='constant', constant_values=(u_left, u_right))
 	return u
 
-@partial(jax.jit, static_argnames=("N"))
+@partial(jax.jit, static_argnames="N")
 def solve_linRD(L, N, u_left, u_right, a, k, c):
 	'''
 	- a u_xx + k(x) u = c, a > 0, k(x) > 0
 	over domain [0,L]
 	a, c : constants
 	k(x) : spatially varying coefficient, size (N-1,), should be positive
-	u_left, u_right:  u(0)=b0, u(1)=b1, boundary conditions. 
-	the output is the full solution, (N+1) grid point values.  
+	u_left, u_right:  u(0)=b0, u(1)=b1, boundary conditions.
+	the output is the full solution, (N+1) grid point values.
 	'''
 	dx = L / N
 	# x = jnp.linspace(0, L, N+1)
@@ -57,15 +57,15 @@ def solve_linRD(L, N, u_left, u_right, a, k, c):
 	u = jnp.pad(out_u, (1, 1), mode='constant', constant_values=(u_left, u_right))
 	return u
 
-@partial(jax.jit, static_argnames=("N"))
+@partial(jax.jit, static_argnames="N")
 def solve_square(L, N, u, u_left, u_right, a, k):
 	'''
 	- a u_xx + k u^2 = c(x), a > 0, k > 0
 	over domain [0,L]
 	u_left, u_right, a, k : constant parameters
 	c(x) : spatially varying coefficient, size (N+1,)
-	u_left, u_right:  u(0)=b0, u(1)=b1, boundary conditions. 
-	the output is the full solution and k, (N+1) grid point values.  
+	u_left, u_right:  u(0)=b0, u(1)=b1, boundary conditions.
+	the output is the full solution and k, (N+1) grid point values.
 	u: a given profile (possibly a GP), need to be matched with u_left, u_right
 		size [N+1,]
 	'''
@@ -74,16 +74,16 @@ def solve_square(L, N, u, u_left, u_right, a, k):
 	uxx = dutils.laplace_u(new_u, dx)
 	c = -a * uxx+ k * new_u **2
 	return new_u,c
-		
-@partial(jax.jit, static_argnames=("N"))
+
+@partial(jax.jit, static_argnames="N")
 def solve_nonlinRD(L, N, u, u_left, u_right, a, k):
 	'''
 	- a u_xx + k u^3 = c(x), a > 0, k > 0
 	over domain [0,L]
 	u_left, u_right, a, k : constant parameters
 	c(x) : spatially varying coefficient, size (N+1,)
-	u_left, u_right:  u(0)=b0, u(1)=b1, boundary conditions. 
-	the output is the full solution and k, (N+1) grid point values.  
+	u_left, u_right:  u(0)=b0, u(1)=b1, boundary conditions.
+	the output is the full solution and k, (N+1) grid point values.
 	u: a given profile (possibly a GP), need to be matched with u_left, u_right
 		size [N+1,]
 	'''
@@ -96,7 +96,7 @@ def solve_nonlinRD(L, N, u, u_left, u_right, a, k):
 @partial(jax.jit, static_argnames=("N_t","N_x"))
 def solve_lin2d(L_x, L_t, N_x, N_t, uxt_GP, coeffs):
 	'''
-	To be honest, this is not really 'solving' anything. 
+	To be honest, this is not really 'solving' anything.
 	It is just applying the derivatives and the coefficients to the given u(x,t) to find g(x,t).
 	That's why it returns g(x,t) instead of u(x,t).
 	a*u_xx + b*u_xt + c*u_tt + d*u_x + e*u_t + f*u = g(x,t)
@@ -132,11 +132,11 @@ def solve_heat_homog(initial_condition, domlen, trajlen, k, ul, ur):
 		dt: float, time step size
 		k: float, thermal conductivity coefficient
 		ul, ur: floats, boundary conditions
-	returns:  
+	returns:
 		u: array, (trajlen,trajlen)
 	'''
-	dx = dt = domlen / (trajlen)
-	u = jnp.zeros((trajlen, trajlen)) #initialize temp array
+	dx = dt = domlen / trajlen
+	u = jnp.zeros((trajlen, trajlen)) # initialize temp array
 	u = u.at[0,:].set(initial_condition)
 	u = u.at[:,[0,-1]].set([ul, ur])
 
@@ -149,19 +149,20 @@ def solve_heat_homog(initial_condition, domlen, trajlen, k, ul, ur):
 def solve_heat_nonhomog(initial_condition, domlen, trajlen, k, a, ul, ur):
 	'''Solve 1D nonhomog. heat equation using explicit finite difference method
 	@params:
-		initial_condition: (num, trajlen), u(x,0)
-		domlen: float, length of domain (for simplicity, insist that domlen of x = domlen of t)
+		initial_condition: (num, trajlen), u(x,0) in degrees Celsius
+		domlen: float, length of domain in meters (for simplicity, insist that domlen of x = domlen of t)
 		trajlen: int, number of spatial points (same with trajlen)
-		dt: float, time step size
-		k: float, thermal conductivity coefficient
-		a: float, heat transfer coefficient
-		ul, ur: floats, boundary conditions
-	returns:  
+		dt: float, time step size in seconds
+		k: float, thermal conductivity coefficient in W/(m·K)
+		a: float, heat transfer coefficient in W/(m^2·K)
+		ul, ur: floats, boundary conditions in degrees Celsius
+	returns:
 		u: array, (trajlen,trajlen)
 	'''
 	dx = dt = domlen/trajlen
-	u = jnp.zeros((trajlen, trajlen)) #initialize temp array
+	u = jnp.zeros((trajlen, trajlen)) # initialize temp array
 	u = u.at[0,:].set(initial_condition)
+	# Set the boundary conditions at the left and right ends
 	u = u.at[:,[0,-1]].set([ul,ur])
 
 	for n in range(0, trajlen-1):

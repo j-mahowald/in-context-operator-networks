@@ -22,6 +22,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def print_dot(i):
+	'Prints a dot every 100 iterations'
 	if i % 100 == 0:
 		print(".", end = "", flush = True)
 
@@ -195,7 +196,7 @@ def generate_pde_porous(seed, eqns, quests, length, dx, num, caption_mode, name)
 			all_xs.append(einshape("i->jik", xs, j = num, k = 1)) # (num, N+1, 1)
 			all_ks.append(einshape("ij->ijk", ks, k = 1)) # (num, N+1, 1)
 			all_us.append(einshape("ij->ijk", us, k = 1)) # (num, N+1, 1)
-			all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}".format(coeff_ul, coeff_ur, coeff_c, coeff_a))
+			all_params.append(f"{coeff_ul:.8f}_{coeff_ur:.8f}_{coeff_c:.8f}_{coeff_a:.8f}")
 			all_eqn_captions.append(None)
 		print_dot(i)
 	for ptype in ['forward', 'inverse']:
@@ -233,7 +234,7 @@ def generate_pde_cubic(seed, eqns, quests, length, dx, num, caption_mode, name):
 			all_xs.append(einshape("i->jik", xs, j = num, k = 1)) # (num, N+1, 1)
 			all_cs.append(einshape("ij->ijk", cs, k = 1)) # (num, N+1, 1)
 			all_us.append(einshape("ij->ijk", us, k = 1)) # (num, N+1, 1)
-			all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}".format(coeff_ul, coeff_ur, coeff_a, coeff_k))
+			all_params.append(f"{coeff_ul:.8f}_{coeff_ur:.8f}_{coeff_a:.8f}_{coeff_k:.8f}")
 			all_eqn_captions.append(None)
 		print_dot(i)
 	for ptype in ["forward","inverse"]:
@@ -335,8 +336,9 @@ def generate_mfc_rhoparam_hj(seed, eqns, quests, length, dx, dt, nu_nx_ratio, nu
 			all_gs_key.append(np.array(einshape("i->jik", xs, j = num, k = 1))) # (num, nx, 1)
 			all_gs_value.append(np.array(g_batch[:,::nu_nx_ratio,None])) # (num, nx, 1)
 			# 10 data points, 0, 1/10, 2/10, ..., 9/10
-			all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}"
-										.format(init_rho[0], init_rho[nu//10], init_rho[2*nu//10], init_rho[3*nu//10], init_rho[4*nu//10], init_rho[5*nu//10], init_rho[6*nu//10], init_rho[7*nu//10], init_rho[8*nu//10], init_rho[9*nu//10]))
+			all_params.append(f"{init_rho[0]:.8f}_{init_rho[nu//10]:.8f}_{init_rho[2*nu//10]:.8f}_\
+					{init_rho[3*nu//10]:.8f}_{init_rho[4*nu//10]:.8f}_{init_rho[5*nu//10]:.8f}_{init_rho[6*nu//10]:.8f}\
+					_{init_rho[7*nu//10]:.8f}_{init_rho[8*nu//10]:.8f}_{init_rho[9*nu//10]:.8f}")
 			all_eqn_captions.append(None)
 		print_dot(i)
 	for ptype in ["forward11", "forward12"]:
@@ -394,7 +396,7 @@ def generate_pde_lin2d(seed, eqns, quests, length, dx, dt, num, caption_mode, na
 			all_xts.append(np.array(xts_grids_batch))
 			all_gs.append(np.array(gs[..., None]))
 			all_uxts.append(np.array(uxts_GP[..., None]))
-			all_params.append("{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}_{:.8f}".format(coeff_a, coeff_b, coeff_c, coeff_d, coeff_e, coeff_f))
+			all_params.append(f"{coeff_a:.8f}_{coeff_b:.8f}_{coeff_c:.8f}_{coeff_d:.8f}_{coeff_e:.8f}_{coeff_f:.8f}")
 			all_eqn_captions.append(None)
 		print('.', end='', flush=True)
 
@@ -447,19 +449,19 @@ def generate_pde_heat_nonhomog(seed, eqns, quests, domlen, trajlen, num, name):
 			xs = jnp.linspace(0.0, domlen, trajlen)# (trajlen,)
 			fs = dutils.generate_gaussian_process(subkey_q, xs, num, kernel = dutils.rbf_kernel_jax, k_sigma = 1.0, k_l = 0.5) # (num, N+1)
 			us = pdes.solve_heat_nonhomog_batch(fs, domlen, trajlen, coeff_k, coeff_a, coeff_ul, coeff_ur)
-			all_xs.append(einshape("i->jik", xs, j = num, k = 1)) # (num, trajlen+1, 1)
+			all_xs.append(einshape("i->jik", xs, j = num, k = 1)) # (num, trajlen, 1)
 			all_us.append(einshape("ijk->ijkl", us, l=1)) # (num, trajlen, trajlen, 1)
 			all_params.append(f"{coeff_k:.8f}_{coeff_a:.8f}_{coeff_ul:.8f}_{coeff_ur:.8f}_q{j}")
 	datawrite.write_pde_heat(name, eqn_type='pde_heat_nonhomog', all_params=all_params, all_xs=all_xs,
 							  all_us=all_us, problem_type='forward', time_step=int(time_step/(domlen/trajlen)))
 
 def main(argv):
+	'Main call for datagen'
 	FLAGS = flags.FLAGS
 	for _, value in FLAGS.__flags.items():
 		print(value.name, ": ", value._value, flush=True)
 
-
-	name = '{}/{}'.format(FLAGS.dir, FLAGS.name)
+	name = f"{FLAGS.dir}/{FLAGS.name}"
 
 	if not os.path.exists(FLAGS.dir):
 		os.makedirs(FLAGS.dir)
@@ -487,7 +489,6 @@ def main(argv):
 	if 'pde_porous_spatial' in FLAGS.eqn_types:
 		generate_pde_porous(seed = FLAGS.seed, eqns = FLAGS.eqns, quests = FLAGS.quests, length = FLAGS.length,
 								dx = FLAGS.dx, num = FLAGS.num, caption_mode = FLAGS.caption_mode, name = name)
-
 
 	if 'pde_cubic_spatial' in FLAGS.eqn_types:
 		generate_pde_cubic(seed = FLAGS.seed, eqns = FLAGS.eqns, quests = FLAGS.quests, length = FLAGS.length,
@@ -525,7 +526,7 @@ if __name__ == "__main__":
 	flags.DEFINE_string('caption_mode', None, 'mode for caption')
 	flags.DEFINE_integer('num', 10, 'number of systems in each equation')
 	flags.DEFINE_integer('quests', 5, 'number of questions in each operator')
-	flags.DEFINE_integer('eqns', 10, 'number of equations')
+	flags.DEFINE_integer('eqns', 100, 'number of equations')
 	flags.DEFINE_integer('length', 50, 'length of trajectory and control')
 	flags.DEFINE_integer('mfc_iters', 1000, 'iterations for solving mfc')
 	flags.DEFINE_float('mfc_tol', 1e-10, 'res tolerance for solving mfc')
@@ -534,7 +535,7 @@ if __name__ == "__main__":
 	flags.DEFINE_float('dx', 0.02, 'time step in dynamics')
 	flags.DEFINE_integer('nu_nx_ratio', 1, 'nu_nx_ratio in mfc_hj')
 	flags.DEFINE_string('name', 'data', 'name of the dataset')
-	flags.DEFINE_string('dir', 'data', 'name of the directory to save the data')
+	flags.DEFINE_string('dir', 'icon_lm/data', 'name of the directory to save the data')
 	flags.DEFINE_list('eqn_types', ['pde_heat_homog', 'pde_heat_nonhomog'], 'list of equations for data generation')
 	flags.DEFINE_list('write', [], 'list of features to write')
 

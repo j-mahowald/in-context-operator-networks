@@ -386,11 +386,11 @@ def write_pde_heat(name, eqn_type, all_params, all_xs, all_us, problem_type, tim
 			for params, xs, us in zip(all_params, all_xs, all_us):
 				equation_name = f"{eqn_type}_forward_{params}"
 				# Initial condition as condition
-				cond_k = xs
-				cond_v = us[0, :]
+				cond_k = xs 					# [num, trajlen, k_dim]
+				cond_v = us[:, 0, :, :] 		# [num, trajlen, v_dim]
 				# Solution at specified time step as QOI
-				qoi_k = xs
-				qoi_v = us[time_step, :]
+				qoi_k = xs						# [num, trajlen, k_dim]
+				qoi_v = us[:, time_step, :, :] 	# [num, trajlen, v_dim]
 				count += 1
 				if np.sum(us) != np.nan:
 					s_element = serialize_element(equation=equation_name, caption=None,

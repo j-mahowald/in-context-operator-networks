@@ -263,54 +263,55 @@ def build_sequence(raw, equation, caption, input_id, embedding_raw, embedding_po
 		build_fn = data_sequence.build_pde_spatial_forward
 		this_config = config['pde_spatial_forward']
 		out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
-									quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
-									config, this_config)
+						quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
+						config, this_config)
 	elif tf.strings.regex_full_match(equation, "pde.*spatial_inverse.*"):
 		build_fn = data_sequence.build_pde_spatial_inverse
 		this_config = config['pde_spatial_inverse']
 		out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
-									quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
-									config, this_config)
+						quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
+						config, this_config)
 	elif tf.strings.regex_full_match(equation, "ode.*forward.*"):
 		build_fn = data_sequence.build_ode_forward
 		this_config = config['ode_forward']
 		out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
-									quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
-									config, this_config)
+						quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
+						config, this_config)
 	elif tf.strings.regex_full_match(equation, "ode.*inverse.*"):
 		# ode inverse, drop the last qoi (control)
 		build_fn = data_sequence.build_ode_inverse
 		this_config = config['ode_inverse']
 		out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
-									quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
-									config, this_config)
+						quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
+						config, this_config)
 	elif tf.strings.regex_full_match(equation, "series.*"):
 		build_fn = data_sequence.build_time_series
 		this_config = config['time_series']
 		out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
-									quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
-									config, this_config)
+						quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
+						config, this_config)
 	elif tf.strings.regex_full_match(equation, "mfc_gparam.*forward.*"):
 		build_fn = data_sequence.build_mfc_gparam_forward
 		this_config = config['mfc_gparam_forward']
 		out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
-									quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
-									config, this_config)
+						quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
+						config, this_config)
 	elif tf.strings.regex_full_match(equation, "mfc_rhoparam.*forward.*"):
 		build_fn = data_sequence.build_mfc_rhoparam_forward
 		this_config = config['mfc_rhoparam_forward']
 		out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
-									quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
-									config, this_config)
+						quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
+						config, this_config)
 	else: # other problems
 		if not (tf.strings.regex_full_match(equation, ".*weno.*") or
-				tf.strings.regex_full_match(equation, ".*pde_linear_3d.*")):
+				tf.strings.regex_full_match(equation, ".*pde_linear_3d.*") or
+				tf.strings.regex_full_match(equation, '.*pde_heat.*')):
 			tf.print("WARNING: see other problems!")
 		build_fn = data_sequence.build_others
 		this_config = config['others']
 		out = build_fn(equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v,
-											quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
-											config, this_config)
+						quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v,
+						config, this_config)
 
 	equation, demo_cond_k, demo_cond_v, demo_qoi_k, demo_qoi_v, \
 				quest_cond_k, quest_cond_v, quest_qoi_k, quest_qoi_v, \
